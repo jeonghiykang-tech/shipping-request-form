@@ -62,7 +62,7 @@ textarea{resize:vertical;min-height:56px}
 .check{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--fg)}
 .check input{width:auto}
 .tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:6px}
-table.items{border-collapse:collapse;width:100%;min-width:1150px;font-size:13px}
+table.items{border-collapse:collapse;width:100%;min-width:1560px;font-size:13px}
 table.items th{background:var(--accent-soft);text-align:left;font-weight:600;font-size:11px;letter-spacing:.04em;text-transform:uppercase;padding:6px;border-bottom:1px solid var(--line);white-space:nowrap}
 table.items td{padding:4px;border-bottom:1px solid var(--line);vertical-align:top}
 table.items input,table.items select{padding:4px 6px;font-size:13px}
@@ -138,7 +138,8 @@ table.doc tfoot td{font-weight:700}
       <p class="sub">Fill the request once. The commercial invoice and bill of lading are built from the same data, so value, origin and weights match on every document.</p>
     </div>
     <div class="tools">
-      <button id="btn-sample" class="ghost" type="button">Load example</button>
+      <button id="btn-sample" class="ghost" type="button">Load MRO example</button>
+      <button id="btn-sample2" class="ghost" type="button">Load export-control example</button>
       <button id="btn-new" class="ghost" type="button">New blank request</button>
       <button id="btn-io" class="ghost" type="button">Copy / paste data</button>
     </div>
@@ -160,7 +161,7 @@ table.doc tfoot td{font-weight:700}
 
   <div id="tab-form" class="grid">
     <div class="stack">
-      <p class="example" id="example-note" hidden>This request is filled with example data. Choose “New blank request” to start your own.</p>
+      <p class="example" id="example-note" hidden>This request is filled with example data. Classifications in the export-control example come from a distributor's published list and depend on frame rate and model; confirm against the manufacturer's classification before use. Choose “New blank request” to start your own.</p>
 
       <section class="panel">
         <h2>Requestor <small>The department sending the goods owns the data on this form</small></h2>
@@ -228,6 +229,8 @@ table.doc tfoot td{font-weight:700}
           <label class="f"><span>Insurance</span><input id="insur" data-k="insur" type="number" min="0" step="0.01"></label>
           <label class="f"><span>Other charges</span><input id="other_chg" data-k="other_chg" type="number" min="0" step="0.01"></label>
           <label class="f"><span>Customs broker</span><input id="broker" data-k="broker"></label>
+          <label class="f"><span>U.S. export authorization</span><input id="us_auth" data-k="us_auth" class="mono" placeholder="DDTC licence, agreement, exemption or BIS licence / exception"></label>
+          <label class="f"><span>Canadian export permit no.</span><input id="ca_permit" data-k="ca_permit" class="mono" placeholder="GAC permit or general export permit"></label>
         </div>
       </section>
 
@@ -251,7 +254,7 @@ table.doc tfoot td{font-weight:700}
         <div class="tablewrap">
           <table class="items" aria-label="Line items">
             <thead><tr>
-              <th>#</th><th>Part no.</th><th style="min-width:200px">Description</th><th>HS / HTS</th><th>COO</th><th>Qty</th><th>UOM</th><th>Unit value</th><th>Line total</th><th>Value source</th><th>Net kg</th><th>Pkgs</th><th>Pkg type</th><th>NMFC class</th><th>USMCA / CUSMA</th><th>Origin criterion</th><th>ECCN</th><th>Hazmat</th><th></th>
+              <th>#</th><th>Part no.</th><th style="min-width:200px">Description</th><th>HS / HTS</th><th>COO</th><th>Qty</th><th>UOM</th><th>Unit value</th><th>Line total</th><th>Value source</th><th>Net kg</th><th>Pkgs</th><th>Pkg type</th><th>NMFC class</th><th>USMCA / CUSMA</th><th>Origin criterion</th><th>ECCN</th><th>USML (ITAR)</th><th>ECL group</th><th>ECL category</th><th>ECL item</th><th>Hazmat</th><th></th>
             </tr></thead>
             <tbody id="items"></tbody>
           </table>
@@ -330,8 +333,19 @@ table.doc tfoot td{font-weight:700}
 (function(){
 const KEY="xb-ship-request-v1";
 const KG_LB=2.20462;
-const blankItem=()=>({part:"",desc:"",hts:"",coo:"",qty:"",uom:"EA",unit:"",src:"",kg:"",pkgs:"",ptype:"Skid",nmfc:"",usmca:"No",crit:"",eccn:"EAR99",hz:"No"});
-const blank=()=>({req_name:"",req_dept:"",req_email:"",req_phone:"",req_date:"",ship_date:"",shp_co:"",shp_contact:"",shp_addr:"",shp_phone:"",shp_tax:"",con_co:"",con_contact:"",con_addr:"",con_phone:"",con_email:"",con_tax:"",dest:"",ior_same:true,ior_co:"",ior_tax:"",ior_addr:"",reason:"",inco:"",inco_place:"",cur:"CAD",inv_no:"",po:"",related:"",port:"",freight:"",insur:"",other_chg:"",broker:"",mode:"",carrier:"",scac:"",pro:"",bol_no:"",seal:"",fterms:"",billto:"",instr:"",gross_kg:"",r_export:false,r_decl:false,r_notice:false,r_ref:"",sig_name:"",sig_title:"",notes:"",shp_email:"",cert_role:"",cert_name:"",cert_title:"",cert_phone:"",cert_email:"",cert_co:"",cert_addr:"",prod_mode:"Same as exporter",prod_co:"",prod_addr:"",prod_phone:"",prod_email:"",bl_from:"",bl_to:"",cert_date:"",items:[blankItem()],_example:false});
+const blankItem=()=>({part:"",desc:"",hts:"",coo:"",qty:"",uom:"EA",unit:"",src:"",kg:"",pkgs:"",ptype:"Skid",nmfc:"",usmca:"No",crit:"",eccn:"EAR99",itar:"",eclg:"",eclc:"",ecli:"",hz:"No"});
+const blank=()=>({req_name:"",req_dept:"",req_email:"",req_phone:"",req_date:"",ship_date:"",shp_co:"",shp_contact:"",shp_addr:"",shp_phone:"",shp_tax:"",con_co:"",con_contact:"",con_addr:"",con_phone:"",con_email:"",con_tax:"",dest:"",ior_same:true,ior_co:"",ior_tax:"",ior_addr:"",reason:"",inco:"",inco_place:"",cur:"CAD",inv_no:"",po:"",related:"",port:"",freight:"",insur:"",other_chg:"",broker:"",mode:"",carrier:"",scac:"",pro:"",bol_no:"",seal:"",fterms:"",billto:"",instr:"",gross_kg:"",r_export:false,r_decl:false,r_notice:false,r_ref:"",sig_name:"",sig_title:"",notes:"",shp_email:"",cert_role:"",cert_name:"",cert_title:"",cert_phone:"",cert_email:"",cert_co:"",cert_addr:"",prod_mode:"Same as exporter",prod_co:"",prod_addr:"",prod_phone:"",prod_email:"",bl_from:"",bl_to:"",cert_date:"",us_auth:"",ca_permit:"",items:[blankItem()],_example:false});
+const sample2=()=>Object.assign(blank(),{req_name:"Alex Chen",req_dept:"Engineering (machine)",req_email:"a.chen@example-imaging.ca",req_phone:"519-555-0177",req_date:"2026-10-28",ship_date:"2026-10-30",
+ shp_co:"Example Imaging Systems Inc.",shp_contact:"Shipping Office",shp_addr:"300 Example Pkwy\nWaterloo, ON N2L 0A1\nCanada",shp_phone:"519-555-0170",shp_email:"shipping@example-imaging.ca",shp_tax:"987654321RM0001",
+ con_co:"Example Vision Labs LLC",con_contact:"Receiving",con_addr:"77 Example St\nBuffalo, NY 14202\nUnited States",con_phone:"716-555-0133",con_email:"receiving@example-vision.com",con_tax:"16-7654321",dest:"US",ior_same:true,
+ reason:"Sale",inco:"FCA",inco_place:"Waterloo, ON",cur:"USD",inv_no:"EIS-2026-1028",po:"EV-40217",related:"No",port:"Buffalo, NY (0901) – Peace Bridge",freight:"85",broker:"Example Customs Brokers",
+ us_auth:"",ca_permit:"",mode:"Courier",carrier:"Example Courier",pro:"1Z EX4 2026 1028",bol_no:"BOL-1028-01",fterms:"Prepaid",gross_kg:"4.5",
+ sig_name:"Alex Chen",sig_title:"Export Compliance Lead",
+ items:[
+  {part:"BOSON-640-60HZ",desc:"Teledyne FLIR Boson 640 uncooled LWIR thermal camera core, 60 Hz (example)",hts:"",coo:"US",qty:"2",uom:"EA",unit:"4200",src:"Distributor inv. EX-1182",kg:"0.2",pkgs:"1",ptype:"Box",nmfc:"",usmca:"No",crit:"",eccn:"6A003.b.4.b",itar:"",eclg:"1",eclc:"6",ecli:"1-6.A.3.b.4.b",hz:"No"},
+  {part:"BOSON-640-9HZ",desc:"Teledyne FLIR Boson 640 uncooled LWIR thermal camera core, 9 Hz (example)",hts:"",coo:"US",qty:"4",uom:"EA",unit:"2900",src:"Distributor inv. EX-1182",kg:"0.4",pkgs:"1",ptype:"Box",nmfc:"",usmca:"No",crit:"",eccn:"6A993",itar:"",eclg:"NC",eclc:"",ecli:"",hz:"No"},
+  {part:"QUARK-640-30HZ",desc:"FLIR Quark 640 LWIR thermal camera core, 30 Hz (example)",hts:"",coo:"US",qty:"1",uom:"EA",unit:"5500",src:"Distributor inv. EX-1190",kg:"0.1",pkgs:"1",ptype:"Box",nmfc:"",usmca:"No",crit:"",eccn:"",itar:"XII(c)",eclg:"",eclc:"",ecli:"",hz:"No"}],
+ _example:true});
 const sample=()=>({req_name:"Daniel Moreau",req_dept:"MRO",req_email:"d.moreau@example-steel.ca",req_phone:"519-555-0142",req_date:"2026-10-27",ship_date:"2026-10-29",
  shp_co:"Example Steel Blanks Canada Inc.",shp_contact:"Shipping Office",shp_addr:"100 Example Rd\nWoodstock, ON N4S 0A1\nCanada",shp_phone:"519-555-0100",shp_tax:"123456789RM0001",
  con_co:"Example Steel Blanks USA LLC",con_contact:"Receiving",con_addr:"2500 Example Ave\nDetroit, MI 48201\nUnited States",con_phone:"313-555-0190",con_email:"receiving@example-steel.com",con_tax:"38-1234567",dest:"US",
@@ -368,7 +382,7 @@ function loadFields(){
 }
 
 /* items */
-const cols=[["part","text","mono",110],["desc","text","",200],["hts","text","mono",120],["coo","text","mono",56],["qty","number","",64],["uom","sel:EA,PCS,KG,LB,M,SET,PR","",70],["unit","number","",96],["_tot"],["src","text","",140],["kg","number","",72],["pkgs","number","",56],["ptype","sel:Skid,Crate,Box,Carton,Coil,Bundle,Drum","",90],["nmfc","text","mono",70],["usmca","sel:No,Yes","",70],["crit","sel:,A,B,C,D","",64],["eccn","text","mono",80],["hz","sel:No,Yes","",62]];
+const cols=[["part","text","mono",110],["desc","text","",200],["hts","text","mono",120],["coo","text","mono",56],["qty","number","",64],["uom","sel:EA,PCS,KG,LB,M,SET,PR","",70],["unit","number","",96],["_tot"],["src","text","",140],["kg","number","",72],["pkgs","number","",56],["ptype","sel:Skid,Crate,Box,Carton,Coil,Bundle,Drum","",90],["nmfc","text","mono",70],["usmca","sel:No,Yes","",70],["crit","sel:,A,B,C,D","",64],["eccn","text","mono",100],["itar","text","mono",90],["eclg","sel:,NC,1,2,3,4,5,6,7,9","",64],["eclc","text","mono",60],["ecli","text","mono",130],["hz","sel:No,Yes","",62]];
 function renderItems(){
   const tb=$("items");tb.innerHTML="";
   S.items.forEach((it,i)=>{
@@ -426,6 +440,20 @@ function checks(){
       if(!it.crit)E(`Line ${n}: USMCA claimed. Choose the origin criterion (A–D).`);
       if(it.coo.trim()&&!/^(CA|US|MX)$/i.test(it.coo.trim()))W(`Line ${n}: USMCA claimed but country of origin is ${it.coo.toUpperCase()}. Confirm the origin determination.`);
     }
+    const itar=(it.itar||"").trim(),eccn=(it.eccn||"").trim(),eg=it.eclg||"";
+    if(itar&&eccn)E(`Line ${n}: has both a USML category (${itar}) and an ECCN (${eccn}). An item is subject to either the ITAR or the EAR, not both. Clear one.`);
+    if(!itar&&!eccn)W(`Line ${n}: no U.S. export classification. Enter the ECCN, EAR99, or the USML category.`);
+    if(itar){
+      if(!S.us_auth.trim())E(`Line ${n}: ITAR item (USML ${itar}). Enter the DDTC licence, agreement or exemption that covers this shipment, or note why none is needed. The commercial invoice must show it (22 CFR 123.9(b)).`);
+      W(`Line ${n}: ITAR item in Canada. Confirm the Export Control List classification and that everyone handling it is registered or exempt under the Controlled Goods Program.`);
+      if(!eg)W(`Line ${n}: ECL group not entered for an ITAR item.`);
+    }
+    if(!eg)W(`Line ${n}: no Canadian Export Control List entry. Choose a group, or NC if the item is not controlled.`);
+    if(eg&&eg!=="NC"){
+      if(!(it.ecli||"").trim())W(`Line ${n}: ECL group ${eg} selected but no ECL item number (e.g. 1-6.A.3, 2-15, 5400).`);
+      if(!S.ca_permit.trim())W(`Line ${n}: ECL group ${eg}. Check whether a Global Affairs Canada export permit is needed for this destination, and enter it if one applies.`);
+    }
+    if(it.ecli&&eg&&eg!=="NC"&&!it.ecli.trim().startsWith(eg))W(`Line ${n}: ECL item ${it.ecli} does not match group ${eg}.`);
     if(it.hz==="Yes")E(`Line ${n}: hazardous material. Dangerous goods paperwork and placards are required; this BOL alone is not enough.`);
     if(it.eccn.trim()&&!/^EAR99$/i.test(it.eccn.trim()))W(`Line ${n}: ECCN ${it.eccn} is on the Commerce Control List. Check licence requirements before export; the invoice will carry the EAR destination control statement (15 CFR 758.6).`);
     if(["72","73"].includes(it.hts.replace(/\D/g,"").slice(0,2))&&S.dest==="US")W(`Line ${n}: Chapter ${it.hts.slice(0,2)} steel. Review Section 232 duty exposure and melt-and-pour reporting before entry.`);
@@ -504,6 +532,7 @@ function renderUS(){
    <p class="foot">Origin criteria (USMCA Article 4.2): A – wholly obtained or produced entirely in the territory of one or more Parties; B – produced entirely in the territory using non-originating materials that satisfy the product-specific rule in Annex 4-B; C – produced entirely in the territory exclusively from originating materials; D – produced entirely in the territory and meets the regional value content requirement under Article 4.2(d). No prescribed form is required. The certification may be made on the invoice or any other document, in English, French or Spanish. Supporting records must be kept for at least five years (Article 5.8).</p>`;
 }
 
+const ctl=it=>[it.eccn&&("ECCN "+it.eccn),it.itar&&("USML "+it.itar),it.ecli?("ECL "+it.ecli):it.eclg==="NC"?"ECL: not controlled":it.eclg?("ECL group "+it.eclg+(it.eclc?", cat. "+it.eclc:"")):""].filter(Boolean).map(esc).join("<br>");
 const countryName={US:"United States",CA:"Canada",MX:"Mexico",OT:"Other"};
 const box=(l,v)=>`<div><span class="lbl">${l}</span><div class="val">${esc(v)||"&nbsp;"}</div></div>`;
 
@@ -517,7 +546,9 @@ function renderCI(){
   if(/TIB/.test(S.reason))flags.push("Temporary importation under bond");
   if(/sample/i.test(S.reason))flags.push("No commercial value");
   if(S.items.some(i=>i.usmca==="Yes"))flags.push("USMCA/CUSMA claimed");
-  const rows=S.items.map((it,i)=>`<tr><td class="r">${i+1}</td><td class="m">${esc(it.part)}</td><td>${esc(it.desc)}</td><td class="m">${esc(it.hts)}</td><td class="m">${esc(it.coo.toUpperCase())}</td><td class="m">${esc(it.eccn)}</td><td class="r">${fmt(num(it.qty),0)} ${esc(it.uom)}</td><td class="r">${fmt(num(it.kg),1)}</td><td class="r">${fmt(num(it.unit))}</td><td class="r">${fmt(num(it.qty)*num(it.unit))}</td></tr>`).join("");
+  if(S.items.some(i=>(i.itar||"").trim()))flags.push("ITAR controlled");
+  if(S.items.some(i=>i.eclg&&i.eclg!=="NC"))flags.push("Canada ECL controlled");
+  const rows=S.items.map((it,i)=>`<tr><td class="r">${i+1}</td><td class="m">${esc(it.part)}</td><td>${esc(it.desc)}</td><td class="m">${esc(it.hts)}</td><td class="m">${esc(it.coo.toUpperCase())}</td><td class="m">${ctl(it)}</td><td class="r">${fmt(num(it.qty),0)} ${esc(it.uom)}</td><td class="r">${fmt(num(it.kg),1)}</td><td class="r">${fmt(num(it.unit))}</td><td class="r">${fmt(num(it.qty)*num(it.unit))}</td></tr>`).join("");
   $("ci").innerHTML=`
    <div class="dochead"><div><h3>Commercial Invoice</h3><div style="margin-top:4px">${flags.map(f=>`<span class="flag">${esc(f)}</span>`).join("")}</div></div>
    <dl class="meta"><dt>Invoice no.</dt><dd>${esc(S.inv_no)||"—"}</dd><dt>Date</dt><dd>${esc(S.ship_date||S.req_date)||"—"}</dd><dt>PO / ref.</dt><dd>${esc(S.po)||"—"}</dd><dt>Currency</dt><dd>${esc(c)}</dd></dl></div>
@@ -526,6 +557,8 @@ function renderCI(){
      ${box("Consignee (Ship to / Buyer)",[S.con_co,S.con_addr,S.con_contact&&("Attn: "+S.con_contact),S.con_phone&&("Tel: "+S.con_phone),S.con_email,S.con_tax&&("Tax ID: "+S.con_tax)].filter(Boolean).join("\n"))}
      ${box("Importer of record",ior)}
      ${box("Customs broker",S.broker)}
+     ${box("U.S. export authorization",S.us_auth)}
+     ${box("Canadian export permit",S.ca_permit)}
    </div>
    <div class="boxes four">
      ${box("Terms of sale (Incoterms® 2020)",[S.inco,S.inco_place].filter(Boolean).join(" "))}
@@ -537,7 +570,7 @@ function renderCI(){
      ${box("Tracking / PRO",S.pro)}
      ${box("Packages / gross wt",`${t.pk} pkg · ${fmt(t.gross,1)} kg (${fmt(t.gross*KG_LB,1)} lb)`)}
    </div>
-   <table class="doc"><thead><tr><th class="r">#</th><th>Part no.</th><th>Full description of goods</th><th>HS / HTS</th><th>Origin</th><th>ECCN</th><th class="r">Qty</th><th class="r">Net kg</th><th class="r">Unit value</th><th class="r">Total (${esc(c)})</th></tr></thead>
+   <table class="doc"><thead><tr><th class="r">#</th><th>Part no.</th><th>Full description of goods</th><th>HS / HTS</th><th>Origin</th><th>Export control</th><th class="r">Qty</th><th class="r">Net kg</th><th class="r">Unit value</th><th class="r">Total (${esc(c)})</th></tr></thead>
    <tbody>${rows}</tbody>
    <tfoot><tr><td colspan="6">Totals</td><td class="r">${fmt(t.qty,0)}</td><td class="r">${fmt(t.kg,1)}</td><td></td><td class="r">${fmt(t.val)}</td></tr></tfoot></table>
    <div class="sumgrid">
@@ -547,6 +580,7 @@ function renderCI(){
        ${/sample/i.test(S.reason)?`<p><b>No commercial value.</b> Value shown is for customs purposes only.</p>`:""}
        ${S.items.some(i=>i.usmca==="Yes")?`<p><b>USMCA/CUSMA.</b> Preferential treatment is claimed for lines marked origin-qualifying; a certification of origin is provided separately.</p>`:""}
        <p>I declare that the information on this invoice is true and correct, and that the contents and value of this shipment are as stated above.</p>
+       ${S.items.some(i=>(i.itar||"").trim())?`<p><b>ITAR (22 CFR 123.9(b)).</b> Country of ultimate destination: ${esc(countryName[S.dest]||"")}. End-user: ${esc(S.con_co)}. Authorization: ${esc(S.us_auth)||"________"}. These items are controlled by the U.S. government and authorized for export only to the country of ultimate destination for use by the end-user herein identified. They may not be resold, transferred, or otherwise be disposed of, to any other country or to any person other than the authorized end-user or consignee(s), either in their original form or after being incorporated into other end-items, without first obtaining approval from the U.S. Department of State or use of an applicable exemption.</p>`:""}
        ${S.items.some(i=>(i.eccn||"").trim()&&!/^EAR99$/i.test(i.eccn.trim()))?`<p style="margin:0">These items are controlled by the U.S. government and authorized for export only to the country of ultimate destination for use by the ultimate consignee or end-user(s) herein identified. They may not be resold, transferred, or otherwise disposed of, to any other country or to any person other than the authorized ultimate consignee or end-user(s), either in their original form or after being incorporated into other items, without first obtaining approval from the U.S. government or as otherwise authorized by U.S. law and regulations.</p>`:""}
      </div>
      <div class="sumtbl">
@@ -606,7 +640,8 @@ document.querySelectorAll("[data-goto]").forEach(b=>b.addEventListener("click",(
 
 /* toolbar */
 let pendingNew=false;
-$("btn-sample").addEventListener("click",()=>{S=sample();save();loadFields();});
+$("btn-sample").addEventListener("click",()=>{S=Object.assign(blank(),sample());save();loadFields();});
+$("btn-sample2").addEventListener("click",()=>{S=sample2();save();loadFields();show("form");});
 $("btn-new").addEventListener("click",e=>{
   if(!pendingNew){pendingNew=true;e.target.textContent="Clear all fields?";setTimeout(()=>{pendingNew=false;e.target.textContent="New blank request"},3500);return;}
   pendingNew=false;e.target.textContent="New blank request";S=blank();S.ior_same=true;save();loadFields();show("form");
