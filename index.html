@@ -4,7 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Cross-Border Shipping Request</title>
+<meta name="description" content="Free cross-border shipping request form for Canada, U.S. and Mexico shipments. Builds a matching commercial invoice, bill of lading and USMCA / CUSMA certification of origin, with HTS, origin, ECCN, ITAR and Canadian Export Control List checks.">
+<link rel="canonical" href="https://jeonghiykang-tech.github.io/shipping-request-form/">
+<meta name="author" content="Michelle Liu">
 <meta name="claude:viewport-fit-sides" content="cover">
+<!-- Google AdSense: publisher ID ca-pub-3091236865638643 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3091236865638643" crossorigin="anonymous"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@600;700&display=swap">
 <style>
@@ -121,8 +126,12 @@ table.doc tfoot td{font-weight:700}
 .xcol{text-align:center;font-weight:700}
 .io{display:grid;gap:8px}
 .io textarea{font-family:var(--f-mono);font-size:12px;min-height:120px}
+.adbox{margin-top:32px;border-top:1px solid var(--line);padding-top:12px;min-height:100px}
+.adbox .lbl-ad{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.sitefoot{margin-top:24px;color:var(--muted);font-size:13px;display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:space-between}
+.sitefoot a{color:var(--accent)}
 @media print{
-  body{background:#fff} body::before,header.top,nav.tabs,.docbar,aside.checks,#tab-form{display:none!important}
+  body{background:#fff} body::before,header.top,nav.tabs,.docbar,aside.checks,#tab-form,.adbox,.sitefoot{display:none!important}
   .wrap{padding:0;max-width:none} .paper{box-shadow:none;margin:0;width:auto;min-height:0;padding:0}
   .paperwrap{overflow:visible}
 }
@@ -327,6 +336,17 @@ table.doc tfoot td{font-weight:700}
     <div class="docbar"><span class="hint" id="us-hint"></span><button type="button" class="primary" onclick="window.print()">Print / Save as PDF</button> <button type="button" data-goto="form">Edit request</button></div>
     <div class="paperwrap"><div class="paper" id="us"></div></div>
   </div>
+
+  <div class="adbox" aria-label="Advertisement">
+    <span class="lbl-ad">Advertisement</span>
+    <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3091236865638643" data-ad-format="auto" data-full-width-responsive="true"></ins>
+    <script>try{(adsbygoogle=window.adsbygoogle||[]).push({});}catch(e){}</script>
+  </div>
+
+  <footer class="sitefoot">
+    <span>Free tool by <a href="https://jeonghiykang-tech.github.io/">Michelle Liu</a>, Canada–U.S. trade compliance (CCS, CTCS). Your data stays in your browser.</span>
+    <span>Checks confirm completeness only. They are not a classification, origin or licensing determination.</span>
+  </footer>
 </div>
 
 <script>
