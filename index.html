@@ -7,6 +7,8 @@
 <meta name="description" content="Free cross-border shipping request form for Canada, U.S. and Mexico shipments. Builds a matching commercial invoice, bill of lading and USMCA / CUSMA certification of origin, with HTS, origin, ECCN, ITAR and Canadian Export Control List checks.">
 <link rel="canonical" href="https://jeonghiykang-tech.github.io/shipping-request-form/">
 <meta name="author" content="Michelle Liu">
+<!-- Address of the payment and document server (Cloudflare Worker). Leave empty until it is set up. -->
+<meta name="xb-api" content="">
 <meta name="claude:viewport-fit-sides" content="cover">
 <!-- Google AdSense: publisher ID ca-pub-3091236865638643 -->
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3091236865638643" crossorigin="anonymous"></script>
@@ -126,12 +128,48 @@ table.doc tfoot td{font-weight:700}
 .xcol{text-align:center;font-weight:700}
 .io{display:grid;gap:8px}
 .io textarea{font-family:var(--f-mono);font-size:12px;min-height:120px}
+.acct{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 14px;margin-bottom:12px;display:grid;gap:8px}
+.acct-row{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between;font-size:13px}
+.acct-msg{margin:0;font-size:13px;padding:6px 10px;border-radius:5px;border-left:3px solid var(--ok);background:var(--ok-soft)}
+.acct-msg.warn{border-color:var(--warn);background:var(--warn-soft)}
+.newkey{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between;border:2px dashed var(--accent);border-radius:8px;padding:10px 14px}
+.newkey p{margin:2px 0 0}
+.newkey-val{display:flex;gap:8px;align-items:center}
+.newkey-val .mono{font-size:18px;font-weight:500;letter-spacing:.04em;user-select:all}
+.keypanel{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:end}
+.keypanel .f{flex:1 1 240px}
+.gate{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:16px;margin-bottom:12px}
+.gate-row{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:center;justify-content:space-between}
+.gate-row>div:first-child{flex:1 1 320px;min-width:0}
+.gate-row p{margin:6px 0 0}
+.gate-actions{display:flex;flex-wrap:wrap;gap:8px}
+.gate-warn{color:var(--warn);font-size:13px}
+button:disabled{opacity:.5;cursor:not-allowed}
+.pricing{margin-top:32px;display:grid;gap:12px}
+.pricing h2{font-size:20px}
+.plans{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;align-items:stretch}
+@media (max-width:900px){.plans{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:520px){.plans{grid-template-columns:minmax(0,1fr)}}
+.plan{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:8px;position:relative;min-width:0}
+.plan.featured{border:2px solid var(--accent)}
+.plan.custom{grid-column:1/-1;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));align-items:start;background:var(--accent-soft)}
+.plan.custom .plan-name,.plan.custom .plan-price,.plan.custom .plan-note{grid-column:1}
+.plan.custom ul{margin:0;padding-left:18px;font-size:13px;display:grid;gap:4px}
+.plan.custom .contact{margin:0;font-size:13px}
+.plan.custom .contact .mono{font-size:15px;font-weight:500}
+.plan-tag{position:absolute;top:-10px;right:12px;background:var(--accent);color:var(--accent-ink);font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;padding:2px 8px;border-radius:4px}
+.plan-name{font-family:var(--f-display);font-weight:700;font-size:15px;letter-spacing:.04em;text-transform:uppercase}
+.plan-price{font-family:var(--f-display);font-size:30px;font-weight:700;font-variant-numeric:tabular-nums}
+.plan-price small{font-family:var(--f-body);font-size:13px;font-weight:400;color:var(--muted)}
+.plan-note{font-size:13px;color:var(--muted);flex:1}
+.plan .qty{max-width:120px}
+.sel{user-select:all}
 .adbox{margin-top:32px;border-top:1px solid var(--line);padding-top:12px;min-height:100px}
 .adbox .lbl-ad{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
 .sitefoot{margin-top:24px;color:var(--muted);font-size:13px;display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:space-between}
 .sitefoot a{color:var(--accent)}
 @media print{
-  body{background:#fff} body::before,header.top,nav.tabs,.docbar,aside.checks,#tab-form,.adbox,.sitefoot{display:none!important}
+  body{background:#fff} body::before,header.top,nav.tabs,.docbar,aside.checks,#tab-form,.adbox,.sitefoot,.acct,.gate,.pricing{display:none!important}
   .wrap{padding:0;max-width:none} .paper{box-shadow:none;margin:0;width:auto;min-height:0;padding:0}
   .paperwrap{overflow:visible}
 }
@@ -144,7 +182,7 @@ table.doc tfoot td{font-weight:700}
   <header class="top">
     <div>
       <h1>Cross-Border Shipping Request</h1>
-      <p class="sub">Fill the request once. The commercial invoice and bill of lading are built from the same data, so value, origin and weights match on every document.</p>
+      <p class="sub">Fill the request once. The commercial invoice, bill of lading and USMCA certification are built from the same data, so value, origin and weights match on every document. Filling and checking are free; creating the documents is US$1 per shipment.</p>
     </div>
     <div class="tools">
       <button id="btn-sample" class="ghost" type="button">Load MRO example</button>
@@ -153,6 +191,22 @@ table.doc tfoot td{font-weight:700}
       <button id="btn-io" class="ghost" type="button">Copy / paste data</button>
     </div>
   </header>
+
+  <section class="acct" aria-label="Credits">
+    <div class="acct-row">
+      <span id="acct-status"></span>
+      <span class="tools"><button type="button" id="btn-key" class="ghost">Credit key</button><button type="button" id="btn-buy" class="primary">Buy credits</button></span>
+    </div>
+    <p id="acct-msg" class="acct-msg" role="status" hidden></p>
+    <div id="newkey" class="newkey" hidden>
+      <div><b>Your credit key</b><p class="hint">Save this key. You need it to use your credits on another computer or browser. Stripe also emails you a receipt.</p></div>
+      <div class="newkey-val"><span id="newkey-val" class="mono"></span><button type="button" id="newkey-copy">Copy</button></div>
+    </div>
+    <div id="keypanel" class="keypanel" hidden>
+      <label class="f"><span>Credit key</span><input id="key-in" class="mono" placeholder="XB-ABCD-EFGH-JKLM" autocomplete="off" spellcheck="false"></label>
+      <div class="tools"><button type="button" id="key-save" class="primary">Use this key</button><button type="button" id="key-copy">Copy</button><button type="button" id="key-forget" class="ghost">Remove from this browser</button></div>
+    </div>
+  </section>
 
   <nav class="tabs" role="tablist" aria-label="Documents">
     <button role="tab" id="t-form" aria-selected="true" data-tab="form"><span class="n">1</span>Shipping request</button>
@@ -325,17 +379,68 @@ table.doc tfoot td{font-weight:700}
   </div>
 
   <div id="tab-ci" hidden>
-    <div class="docbar"><span class="hint" id="ci-hint"></span><button type="button" class="primary" onclick="window.print()">Print / Save as PDF</button> <button type="button" data-goto="form">Edit request</button></div>
-    <div class="paperwrap"><div class="paper" id="ci"></div></div>
+    <div class="docbar"><span class="hint" id="ci-hint"></span><span class="tools"><button type="button" class="primary" id="print-ci" disabled>Print / Save as PDF</button> <button type="button" data-goto="form">Edit request</button></span></div>
+    <div class="gate" id="gate-ci"></div>
+    <div class="paperwrap"><div class="paper" id="ci" hidden></div></div>
   </div>
   <div id="tab-bol" hidden>
-    <div class="docbar"><span class="hint" id="bol-hint"></span><button type="button" class="primary" onclick="window.print()">Print / Save as PDF</button> <button type="button" data-goto="form">Edit request</button></div>
-    <div class="paperwrap"><div class="paper" id="bol"></div></div>
+    <div class="docbar"><span class="hint" id="bol-hint"></span><span class="tools"><button type="button" class="primary" id="print-bol" disabled>Print / Save as PDF</button> <button type="button" data-goto="form">Edit request</button></span></div>
+    <div class="gate" id="gate-bol"></div>
+    <div class="paperwrap"><div class="paper" id="bol" hidden></div></div>
   </div>
   <div id="tab-usmca" hidden>
-    <div class="docbar"><span class="hint" id="us-hint"></span><button type="button" class="primary" onclick="window.print()">Print / Save as PDF</button> <button type="button" data-goto="form">Edit request</button></div>
-    <div class="paperwrap"><div class="paper" id="us"></div></div>
+    <div class="docbar"><span class="hint" id="us-hint"></span><span class="tools"><button type="button" class="primary" id="print-us" disabled>Print / Save as PDF</button> <button type="button" data-goto="form">Edit request</button></span></div>
+    <div class="gate" id="gate-us"></div>
+    <div class="paperwrap"><div class="paper" id="us" hidden></div></div>
   </div>
+
+  <section id="pricing" class="pricing" aria-labelledby="pricing-h">
+    <h2 id="pricing-h">Pricing <small>Prices in US dollars. Pay by credit or debit card through Stripe.</small></h2>
+    <p class="hint">One credit creates the full document set for one shipment: commercial invoice, bill of lading and USMCA / CUSMA certification. Edits and reprints of the same shipment are free for 7 days. Credits are valid for 12 months. Filling the form and the compliance check are always free.</p>
+    <div class="plans">
+      <div class="plan">
+        <span class="plan-name">Pay per shipment</span>
+        <span class="plan-price">US$1<small> / shipment</small></span>
+        <span class="plan-note">Buy only what you need</span>
+        <label class="f qty"><span>Shipments</span><input id="qty-single" type="number" min="1" max="100" value="1"></label>
+        <button type="button" class="primary" data-buy="single">Buy credits</button>
+      </div>
+      <div class="plan">
+        <span class="plan-name">10 shipments</span>
+        <span class="plan-price">US$9</span>
+        <span class="plan-note">US$0.90 per shipment · save 10%</span>
+        <button type="button" class="primary" data-buy="p10">Buy 10 credits</button>
+      </div>
+      <div class="plan featured">
+        <span class="plan-tag">Most popular</span>
+        <span class="plan-name">50 shipments</span>
+        <span class="plan-price">US$40</span>
+        <span class="plan-note">US$0.80 per shipment · save 20%</span>
+        <button type="button" class="primary" data-buy="p50">Buy 50 credits</button>
+      </div>
+      <div class="plan">
+        <span class="plan-name">200 shipments</span>
+        <span class="plan-price">US$140</span>
+        <span class="plan-note">US$0.70 per shipment · save 30%</span>
+        <button type="button" class="primary" data-buy="p200">Buy 200 credits</button>
+      </div>
+      <div class="plan custom">
+        <span class="plan-name">Custom</span>
+        <span class="plan-price">Let's talk</span>
+        <span class="plan-note">For companies that want the form built around their own process</span>
+        <ul>
+          <li>Your logo, company details and document layout</li>
+          <li>Your own fields, departments and approval steps</li>
+          <li>Product master for HTS, origin and export control data</li>
+          <li>Import from Excel or your ERP, and volume pricing</li>
+          <li>Team training on cross-border shipping and customs compliance</li>
+        </ul>
+        <p class="contact">Email Michelle Liu<br><span class="mono sel">jeonghiykang@gmail.com</span></p>
+        <button type="button" id="copy-email">Copy email address</button>
+      </div>
+    </div>
+    <p class="hint">Card payments are processed by Stripe. This site never sees or stores your card number. See the <a href="terms.html">terms, refund and privacy policy</a>.</p>
+  </section>
 
   <div class="adbox" aria-label="Advertisement">
     <span class="lbl-ad">Advertisement</span>
@@ -344,7 +449,7 @@ table.doc tfoot td{font-weight:700}
   </div>
 
   <footer class="sitefoot">
-    <span>Free tool by <a href="https://jeonghiykang-tech.github.io/">Michelle Liu</a>, Canada–U.S. trade compliance (CCS, CTCS). Your data stays in your browser.</span>
+    <span>By <a href="https://jeonghiykang-tech.github.io/">Michelle Liu</a>, Canada–U.S. trade compliance (CCS, CTCS) · <a href="terms.html">Terms, refunds and privacy</a> · Custom versions: <span class="sel">jeonghiykang@gmail.com</span></span>
     <span>Checks confirm completeness only. They are not a classification, origin or licensing determination.</span>
   </footer>
 </div>
@@ -519,136 +624,130 @@ function refresh(){
   $("issues").innerHTML=iss.length?iss.map(([k,m])=>`<li class="${k}">${esc(m)}</li>`).join(""):`<li class="ok">All required fields are complete.</li>`;
   const h=errs?`Draft: ${errs} item${errs>1?"s":""} still to fix on the request.`:"Built from the request. Changes on the request update this document.";
   $("ci-hint").textContent=h;$("bol-hint").textContent=h;$("us-hint").textContent=h;
-  renderCI();renderBOL();renderUS();
+  docState();
 }
 
-const pl=(...a)=>a.filter(Boolean).join("\n");
-function renderUS(){
-  const lines=S.items.filter(it=>it.usmca==="Yes");
-  if(!lines.length){$("us").innerHTML=`<div class="dochead"><h3>USMCA / CUSMA Certification of Origin</h3></div><p>No line on this request claims USMCA / CUSMA preference. To build the certification, set “USMCA / CUSMA” to Yes on a line in the shipping request.</p>`;return;}
-  const imp=S.ior_same?{co:S.con_co,addr:S.con_addr,ph:S.con_phone,em:S.con_email}:{co:S.ior_co,addr:S.ior_addr,ph:"",em:""};
-  const exp={co:S.shp_co,addr:S.shp_addr,ph:S.shp_phone,em:S.shp_email};
-  const dflt=S.cert_role==="Exporter"?exp:S.cert_role==="Importer"?imp:S.prod_mode==="Other producer"?{co:S.prod_co,addr:S.prod_addr}:S.prod_mode==="Same as exporter"?exp:{};
-  const cert=pl(S.cert_name&&(S.cert_name+(S.cert_title?", "+S.cert_title:"")),S.cert_co||dflt.co,S.cert_addr||dflt.addr,S.cert_phone&&("Tel: "+S.cert_phone),S.cert_email&&("Email: "+S.cert_email));
-  const prod=S.prod_mode==="Other producer"?pl(S.prod_co,S.prod_addr,S.prod_phone&&("Tel: "+S.prod_phone),S.prod_email&&("Email: "+S.prod_email)):S.prod_mode;
-  const party=p=>pl(p.co,p.addr,p.ph&&("Tel: "+p.ph),p.em&&("Email: "+p.em));
-  const h6=h=>{const d=(h||"").replace(/\D/g,"");return d.length>=6?d.slice(0,4)+"."+d.slice(4,6):(h||"")};
-  const rows=lines.map((it,k)=>`<tr><td class="r">${k+1}</td><td>${esc(it.desc)}${it.part?` <span class="m">(${esc(it.part)})</span>`:""}</td><td class="m">${esc(h6(it.hts))}</td><td class="xcol">${esc(it.crit)||"—"}</td><td class="m">${esc((it.coo||"").toUpperCase())}</td></tr>`).join("");
-  const period=S.bl_from&&S.bl_to?`${S.bl_from} to ${S.bl_to}`:`Not applicable · single shipment${S.inv_no?", invoice "+S.inv_no:""}`;
-  $("us").innerHTML=`
-   <div class="dochead"><div><h3>USMCA / CUSMA / T-MEC</h3><div class="lbl" style="margin-top:4px">Certification of origin · minimum data elements, USMCA Annex 5-A</div></div>
-   <dl class="meta"><dt>Reference</dt><dd>${esc(S.inv_no)||"—"}</dd><dt>Date</dt><dd>${esc(S.cert_date)||"—"}</dd></dl></div>
-   <div class="boxes">
-     ${box("1. Certifier is the",S.cert_role)}
-     ${box("8. Blanket period",period)}
-     ${box("2. Certifier",cert)}
-     ${box("3. Exporter",party(exp))}
-     ${box("4. Producer",prod)}
-     ${box("5. Importer",party(imp))}
-   </div>
-   <table class="doc"><thead><tr><th class="r">#</th><th>6. Description of goods</th><th>6. HS tariff classification (6-digit)</th><th>7. Origin criterion</th><th>Country of origin</th></tr></thead><tbody>${rows}</tbody></table>
-   <div class="decl"><p style="margin:0"><b>9. Certification.</b> I certify that the goods described in this document qualify as originating and the information contained in this document is true and accurate. I assume responsibility for proving such representations and agree to maintain and present upon request or to make available during a verification visit, documentation necessary to support this certification.</p></div>
-   <div class="sig"><div><span>${esc(S.cert_name)}</span>Authorized signature</div><div><span>${esc(S.cert_title)}</span>Title</div><div><span>${esc(S.cert_date)}</span>Date</div></div>
-   <p class="foot">Origin criteria (USMCA Article 4.2): A – wholly obtained or produced entirely in the territory of one or more Parties; B – produced entirely in the territory using non-originating materials that satisfy the product-specific rule in Annex 4-B; C – produced entirely in the territory exclusively from originating materials; D – produced entirely in the territory and meets the regional value content requirement under Article 4.2(d). No prescribed form is required. The certification may be made on the invoice or any other document, in English, French or Spanish. Supporting records must be kept for at least five years (Article 5.8).</p>`;
-}
+/* ---------- paid documents: credits, checkout, server-built documents ---------- */
+const API=(document.querySelector('meta[name="xb-api"]')?.content||"").replace(/\/+$/,"");
+const KEYSTORE="xb-credit-key";
+let creditKey="";try{creditKey=localStorage.getItem(KEYSTORE)||""}catch(e){}
+let credits=null;           // number once known
+let docs=null;              // {ci,bol,us} from the server
+let docsFor="";             // JSON of the request the documents were built from
+let busy=false;
 
-const ctl=it=>[it.eccn&&("ECCN "+it.eccn),it.itar&&("USML "+it.itar),it.ecli?("ECL "+it.ecli):it.eclg==="NC"?"ECL: not controlled":it.eclg?("ECL group "+it.eclg+(it.eclc?", cat. "+it.eclc:"")):""].filter(Boolean).map(esc).join("<br>");
-const countryName={US:"United States",CA:"Canada",MX:"Mexico",OT:"Other"};
-const box=(l,v)=>`<div><span class="lbl">${l}</span><div class="val">${esc(v)||"&nbsp;"}</div></div>`;
+const reqJSON=()=>{const c=Object.assign({},S);delete c._example;delete c.notes;return JSON.stringify(c)};
+const shipLabel=()=>[S.inv_no&&("Invoice "+S.inv_no),S.shp_co,S.con_co&&("to "+S.con_co)].filter(Boolean).join(" · ");
 
-function renderCI(){
-  const t=totals(),c=S.cur;
-  const ior=S.ior_same?"Same as consignee":[S.ior_co,S.ior_addr,S.ior_tax&&("IOR/Tax ID: "+S.ior_tax)].filter(Boolean).join("\n");
-  const flags=[];
-  if(S.related==="Yes")flags.push("Related parties");
-  if(/repair/i.test(S.reason))flags.push("Goods for repair");
-  if(/9801/.test(S.reason))flags.push("U.S. goods returned · HTS 9801.00.10");
-  if(/TIB/.test(S.reason))flags.push("Temporary importation under bond");
-  if(/sample/i.test(S.reason))flags.push("No commercial value");
-  if(S.items.some(i=>i.usmca==="Yes"))flags.push("USMCA/CUSMA claimed");
-  if(S.items.some(i=>(i.itar||"").trim()))flags.push("ITAR controlled");
-  if(S.items.some(i=>i.eclg&&i.eclg!=="NC"))flags.push("Canada ECL controlled");
-  const rows=S.items.map((it,i)=>`<tr><td class="r">${i+1}</td><td class="m">${esc(it.part)}</td><td>${esc(it.desc)}</td><td class="m">${esc(it.hts)}</td><td class="m">${esc(it.coo.toUpperCase())}</td><td class="m">${ctl(it)}</td><td class="r">${fmt(num(it.qty),0)} ${esc(it.uom)}</td><td class="r">${fmt(num(it.kg),1)}</td><td class="r">${fmt(num(it.unit))}</td><td class="r">${fmt(num(it.qty)*num(it.unit))}</td></tr>`).join("");
-  $("ci").innerHTML=`
-   <div class="dochead"><div><h3>Commercial Invoice</h3><div style="margin-top:4px">${flags.map(f=>`<span class="flag">${esc(f)}</span>`).join("")}</div></div>
-   <dl class="meta"><dt>Invoice no.</dt><dd>${esc(S.inv_no)||"—"}</dd><dt>Date</dt><dd>${esc(S.ship_date||S.req_date)||"—"}</dd><dt>PO / ref.</dt><dd>${esc(S.po)||"—"}</dd><dt>Currency</dt><dd>${esc(c)}</dd></dl></div>
-   <div class="boxes">
-     ${box("Shipper / Exporter (Seller)",[S.shp_co,S.shp_addr,S.shp_contact&&("Attn: "+S.shp_contact),S.shp_phone&&("Tel: "+S.shp_phone),S.shp_tax&&("Tax ID: "+S.shp_tax)].filter(Boolean).join("\n"))}
-     ${box("Consignee (Ship to / Buyer)",[S.con_co,S.con_addr,S.con_contact&&("Attn: "+S.con_contact),S.con_phone&&("Tel: "+S.con_phone),S.con_email,S.con_tax&&("Tax ID: "+S.con_tax)].filter(Boolean).join("\n"))}
-     ${box("Importer of record",ior)}
-     ${box("Customs broker",S.broker)}
-     ${box("U.S. export authorization",S.us_auth)}
-     ${box("Canadian export permit",S.ca_permit)}
-   </div>
-   <div class="boxes four">
-     ${box("Terms of sale (Incoterms® 2020)",[S.inco,S.inco_place].filter(Boolean).join(" "))}
-     ${box("Reason for export",S.reason)}
-     ${box("Related parties",S.related)}
-     ${box("Destination",countryName[S.dest]||"")}
-     ${box("Port of entry / exit",S.port)}
-     ${box("Carrier",S.carrier)}
-     ${box("Tracking / PRO",S.pro)}
-     ${box("Packages / gross wt",`${t.pk} pkg · ${fmt(t.gross,1)} kg (${fmt(t.gross*KG_LB,1)} lb)`)}
-   </div>
-   <table class="doc"><thead><tr><th class="r">#</th><th>Part no.</th><th>Full description of goods</th><th>HS / HTS</th><th>Origin</th><th>Export control</th><th class="r">Qty</th><th class="r">Net kg</th><th class="r">Unit value</th><th class="r">Total (${esc(c)})</th></tr></thead>
-   <tbody>${rows}</tbody>
-   <tfoot><tr><td colspan="6">Totals</td><td class="r">${fmt(t.qty,0)}</td><td class="r">${fmt(t.kg,1)}</td><td></td><td class="r">${fmt(t.val)}</td></tr></tfoot></table>
-   <div class="sumgrid">
-     <div class="decl">
-       ${/9801/.test(S.reason)?`<p><b>U.S. goods returned.</b> The goods listed were exported from the United States and are returned without having been advanced in value or improved in condition by any process of manufacture or other means while abroad.${S.r_ref?" Original export reference: "+esc(S.r_ref)+".":""}</p>`:""}
-       ${/repair/i.test(S.reason)?`<p><b>Goods sent for repair.</b> Value shown is for customs purposes; no sale has taken place.</p>`:""}
-       ${/sample/i.test(S.reason)?`<p><b>No commercial value.</b> Value shown is for customs purposes only.</p>`:""}
-       ${S.items.some(i=>i.usmca==="Yes")?`<p><b>USMCA/CUSMA.</b> Preferential treatment is claimed for lines marked origin-qualifying; a certification of origin is provided separately.</p>`:""}
-       <p>I declare that the information on this invoice is true and correct, and that the contents and value of this shipment are as stated above.</p>
-       ${S.items.some(i=>(i.itar||"").trim())?`<p><b>ITAR (22 CFR 123.9(b)).</b> Country of ultimate destination: ${esc(countryName[S.dest]||"")}. End-user: ${esc(S.con_co)}. Authorization: ${esc(S.us_auth)||"________"}. These items are controlled by the U.S. government and authorized for export only to the country of ultimate destination for use by the end-user herein identified. They may not be resold, transferred, or otherwise be disposed of, to any other country or to any person other than the authorized end-user or consignee(s), either in their original form or after being incorporated into other end-items, without first obtaining approval from the U.S. Department of State or use of an applicable exemption.</p>`:""}
-       ${S.items.some(i=>(i.eccn||"").trim()&&!/^EAR99$/i.test(i.eccn.trim()))?`<p style="margin:0">These items are controlled by the U.S. government and authorized for export only to the country of ultimate destination for use by the ultimate consignee or end-user(s) herein identified. They may not be resold, transferred, or otherwise disposed of, to any other country or to any person other than the authorized ultimate consignee or end-user(s), either in their original form or after being incorporated into other items, without first obtaining approval from the U.S. government or as otherwise authorized by U.S. law and regulations.</p>`:""}
-     </div>
-     <div class="sumtbl">
-       <div><span>Goods value</span><span>${fmt(t.val)}</span></div>
-       <div><span>Freight</span><span>${fmt(num(S.freight))}</span></div>
-       <div><span>Insurance</span><span>${fmt(num(S.insur))}</span></div>
-       <div><span>Other charges</span><span>${fmt(num(S.other_chg))}</span></div>
-       <div><span>Invoice total</span><span>${money(t.inv,c)}</span></div>
-     </div>
-   </div>
-   <div class="sig"><div><span>${esc(S.sig_name)}</span>Name and signature</div><div><span>${esc(S.sig_title)}</span>Title</div><div><span>${esc(S.ship_date||S.req_date)}</span>Date</div></div>
-   <p class="foot">Charges shown separately from the goods value. Country of origin is the country where the goods were produced, not the country of shipment.</p>`;
+async function api(path,opts={}){
+  if(!API)throw new Error("Payments are being set up. Please check back soon, or email jeonghiykang@gmail.com.");
+  let r;
+  try{r=await fetch(API+path,{...opts,headers:{"Content-Type":"application/json"}})}
+  catch(e){throw new Error("Could not reach the document server. Check your connection and try again.")}
+  let b={};try{b=await r.json()}catch(e){}
+  if(!r.ok)throw new Error(b.error||("The server returned an error ("+r.status+")."));
+  return b;
 }
+function setKey(k){creditKey=k||"";try{creditKey?localStorage.setItem(KEYSTORE,creditKey):localStorage.removeItem(KEYSTORE)}catch(e){}}
 
-function renderBOL(){
-  const t=totals();
-  const rows=S.items.map(it=>`<tr><td class="r">${esc(it.pkgs)}</td><td>${esc(it.ptype)}</td><td class="xcol">${it.hz==="Yes"?"X":""}</td><td>${esc(it.desc)}${it.part?` <span class="m">(${esc(it.part)})</span>`:""}</td><td class="m">${esc(it.nmfc)}</td><td class="r">${fmt(num(it.kg)*KG_LB,1)}</td><td class="r">${fmt(num(it.kg),1)}</td></tr>`).join("");
-  $("bol").innerHTML=`
-   <div class="dochead"><div><h3>Bill of Lading</h3><div class="lbl" style="margin-top:4px">Straight bill of lading · not negotiable</div></div>
-   <dl class="meta"><dt>BOL no.</dt><dd>${esc(S.bol_no)||"—"}</dd><dt>Date</dt><dd>${esc(S.ship_date)||"—"}</dd><dt>Carrier</dt><dd>${esc(S.carrier)||"—"}</dd><dt>SCAC</dt><dd>${esc(S.scac)||"—"}</dd><dt>PRO no.</dt><dd>${esc(S.pro)||"—"}</dd></dl></div>
-   <div class="boxes">
-     ${box("Ship from",[S.shp_co,S.shp_addr,S.shp_contact&&("Attn: "+S.shp_contact),S.shp_phone&&("Tel: "+S.shp_phone)].filter(Boolean).join("\n"))}
-     ${box("Ship to",[S.con_co,S.con_addr,S.con_contact&&("Attn: "+S.con_contact),S.con_phone&&("Tel: "+S.con_phone)].filter(Boolean).join("\n"))}
-     ${box("Third party freight charges bill to",S.fterms==="Third party"?S.billto:"")}
-     ${box("Special instructions",S.instr)}
-   </div>
-   <div class="boxes four">
-     ${box("Freight terms",S.fterms)}
-     ${box("Mode",S.mode)}
-     ${box("Trailer / seal no.",S.seal)}
-     ${box("Customer order / PO",S.po)}
-     ${box("Commercial invoice",S.inv_no)}
-     ${box("Customs broker",S.broker)}
-     ${box("Port of crossing",S.port)}
-     ${box("Destination country",countryName[S.dest]||"")}
-   </div>
-   <table class="doc"><thead><tr><th class="r">Pkgs</th><th>Type</th><th>HM</th><th>Commodity description</th><th>NMFC class</th><th class="r">Weight lb</th><th class="r">Weight kg</th></tr></thead>
-   <tbody>${rows}</tbody>
-   <tfoot><tr><td class="r">${t.pk}</td><td colspan="4">Total net weight</td><td class="r">${fmt(t.kg*KG_LB,1)}</td><td class="r">${fmt(t.kg,1)}</td></tr>
-   <tr><td></td><td colspan="4">Gross weight (incl. packaging)</td><td class="r">${fmt(t.gross*KG_LB,1)}</td><td class="r">${fmt(t.gross,1)}</td></tr></tfoot></table>
-   <div class="decl">
-     ${S.items.some(i=>i.hz==="Yes")?`<p><b>Hazardous materials are marked “X”.</b> Shipping papers, emergency response information and placards required by the applicable dangerous goods rules must accompany this shipment.</p>`:`<p>No hazardous materials declared on this shipment.</p>`}
-     <p>Received, subject to the carrier's tariff and terms in effect on the date of issue, the goods described above in apparent good order, except as noted. Declared value and liability limits are those of the carrier's tariff unless otherwise agreed in writing.</p>
-     <p style="margin:0">This shipment crosses an international border. The commercial invoice ${S.inv_no?"no. "+esc(S.inv_no)+" ":""}travels with the freight.</p>
-   </div>
-   <div class="sig"><div><span>${esc(S.sig_name)}</span>Shipper signature</div><div><span></span>Carrier / driver signature</div><div><span></span>Pickup date</div></div>
-   <div class="sig"><div><span></span>Consignee received by</div><div><span></span>Condition / exceptions</div><div><span></span>Delivery date</div></div>`;
+function renderAcct(){
+  const el=$("acct-status");
+  if(!creditKey){el.innerHTML=`<b>No credit key</b> · Fill and check the request for free. Creating the documents uses 1 credit.`;return}
+  el.innerHTML=`Key <span class="mono">${esc(creditKey)}</span> · <b>${credits===null?"…":credits+" credit"+(credits===1?"":"s")}</b> left`;
 }
+async function refreshBalance(){
+  if(!creditKey){credits=null;renderAcct();docState();return}
+  try{const b=await api("/balance?key="+encodeURIComponent(creditKey));credits=b.expired?0:b.credits;
+    if(b.expired)flash("The credits on this key have expired. Buy new credits to continue.","warn")}
+  catch(e){credits=null;flash(e.message,"warn")}
+  renderAcct();docState();
+}
+function flash(msg,kind="ok"){const f=$("acct-msg");f.textContent=msg;f.className="acct-msg "+kind;f.hidden=!msg}
+
+/* document tabs */
+function docState(){
+  const errs=checks().filter(x=>x[0]==="err").length;
+  const stale=docs&&docsFor!==reqJSON();
+  ["ci","bol","us"].forEach(d=>{
+    const paper=$(d),gate=$("gate-"+d),pr=$("print-"+d);
+    pr.disabled=!docs||stale;
+    if(!docs){paper.hidden=true;gate.hidden=false;
+      gate.innerHTML=gateHTML(errs);return}
+    paper.innerHTML=docs[d];paper.hidden=false;
+    gate.hidden=!stale;
+    if(stale)gate.innerHTML=`<div class="gate-row"><div><b>The request changed after these documents were made.</b><br><span class="hint">Update them before printing. Edits to the same shipment (same invoice number, shipper and consignee) are free for 7 days.</span></div><button type="button" class="primary" data-make>Update documents</button></div>`;
+  });
+}
+function gateHTML(errs){
+  const lbl=shipLabel()||"this shipment";
+  const need=!S.inv_no.trim()||!S.shp_co.trim()||!S.con_co.trim();
+  return `<div class="gate-row"><div>
+      <b>Create the commercial invoice, bill of lading and USMCA certification for ${esc(lbl)}.</b>
+      <p class="hint">One shipment uses 1 credit (US$1 or less). Edits and reprints of the same shipment are free for 7 days. Filling the form and the compliance check stay free.</p>
+      ${need?`<p class="gate-warn">Enter the invoice number, shipper company and consignee company first.</p>`:""}
+      ${errs&&!need?`<p class="gate-warn">The compliance check lists ${errs} item${errs>1?"s":""} to fix. You can still create the documents, but review them first.</p>`:""}
+    </div>
+    <div class="gate-actions">
+      ${creditKey?`<button type="button" class="primary" data-make ${need?"disabled":""}>Create documents · 1 credit</button>`:`<button type="button" class="primary" data-goto-plans>Buy credits</button><button type="button" data-enter-key>I have a key</button>`}
+    </div></div>`;
+}
+async function makeDocs(){
+  if(busy)return;
+  if(!creditKey){showPlans();return}
+  busy=true;document.querySelectorAll("[data-make]").forEach(b=>{b.disabled=true;b.textContent="Creating…"});
+  try{
+    const snapshot=reqJSON();
+    const b=await api("/generate",{method:"POST",body:JSON.stringify({key:creditKey,data:JSON.parse(snapshot)})});
+    docs=b.docs;docsFor=snapshot;credits=b.credits;
+    flash(b.charged?`Documents created. 1 credit used, ${b.credits} left. Edits to this shipment are free for 7 days.`:`Documents updated at no charge. ${b.credits} credit${b.credits===1?"":"s"} left.`,"ok");
+  }catch(e){flash(e.message,"warn");if(/credit/i.test(e.message))showPlans()}
+  busy=false;renderAcct();docState();
+}
+document.addEventListener("click",e=>{
+  if(e.target.closest("[data-make]"))makeDocs();
+  if(e.target.closest("[data-goto-plans]"))showPlans();
+  if(e.target.closest("[data-enter-key]"))openKey();
+  const buy=e.target.closest("[data-buy]");if(buy)buyPlan(buy.dataset.buy);
+});
+["ci","bol","us"].forEach(d=>$("print-"+d).addEventListener("click",()=>window.print()));
+
+/* key panel */
+function openKey(){const p=$("keypanel");p.hidden=false;$("key-in").value=creditKey;$("key-in").focus();p.scrollIntoView({block:"nearest"})}
+$("btn-key").addEventListener("click",()=>{const p=$("keypanel");p.hidden?openKey():p.hidden=true});
+$("key-save").addEventListener("click",async()=>{
+  const k=$("key-in").value.trim().toUpperCase();
+  if(!/^XB-[A-Z2-9]{4}-[A-Z2-9]{4}-[A-Z2-9]{4}$/.test(k)){flash("A credit key looks like XB-ABCD-EFGH-JKLM. Check it and try again.","warn");return}
+  setKey(k);$("keypanel").hidden=true;flash("Key saved on this browser.","ok");await refreshBalance();
+});
+$("key-copy").addEventListener("click",()=>{const v=$("key-in").value;navigator.clipboard.writeText(v).then(()=>flash("Key copied.","ok")).catch(()=>{$("key-in").select();flash("Key selected. Press Ctrl+C (⌘C) to copy.","ok")})});
+$("key-forget").addEventListener("click",()=>{setKey("");credits=null;$("keypanel").hidden=true;flash("Key removed from this browser. Keep a copy if it still has credits.","ok");renderAcct();docState()});
+
+/* plans and checkout */
+function showPlans(){$("pricing").scrollIntoView({behavior:"smooth",block:"start"})}
+$("btn-buy").addEventListener("click",showPlans);
+async function buyPlan(plan){
+  const btn=document.querySelector(`[data-buy="${plan}"]`);const old=btn.textContent;btn.disabled=true;btn.textContent="Opening secure checkout…";
+  try{const qty=plan==="single"?Math.max(1,Math.min(100,parseInt($("qty-single").value,10)||1)):1;
+    const b=await api("/checkout",{method:"POST",body:JSON.stringify({plan,qty,key:creditKey})});
+    location.href=b.url}
+  catch(e){flash(e.message,"warn");btn.disabled=false;btn.textContent=old}
+}
+async function returnFromCheckout(){
+  const q=new URLSearchParams(location.search);
+  const sid=q.get("session_id");
+  if(q.get("checkout")==="cancelled")flash("Payment cancelled. No charge was made.","warn");
+  if(sid){
+    flash("Confirming your payment…","ok");
+    try{const b=await api("/claim?session_id="+encodeURIComponent(sid));
+      setKey(b.key);credits=b.credits;
+      $("newkey").hidden=false;$("newkey-val").textContent=b.key;
+      flash(b.already?`Your key has ${b.credits} credits.`:`Payment received. ${b.added} credit${b.added===1?"":"s"} added. Your key now has ${b.credits}.`,"ok");
+    }catch(e){flash(e.message+" If you were charged, email jeonghiykang@gmail.com with your receipt.","warn")}
+  }
+  if(sid||q.has("checkout"))history.replaceState(null,"",location.pathname+location.hash);
+  renderAcct();docState();
+}
+$("newkey-copy").addEventListener("click",()=>{const v=$("newkey-val").textContent;navigator.clipboard.writeText(v).then(()=>flash("Key copied. Keep it somewhere safe.","ok")).catch(()=>flash("Select the key and copy it.","ok"))});
 
 /* tabs */
 function show(tab){
@@ -676,7 +775,11 @@ $("io-load").addEventListener("click",()=>{
   catch(e){$("io-msg").textContent="That text isn't valid request data. Paste the full text copied from this page.";}
 });
 
+$("copy-email").addEventListener("click",()=>{navigator.clipboard.writeText("jeonghiykang@gmail.com").then(()=>flash("Email address copied.","ok")).catch(()=>flash("Email: jeonghiykang@gmail.com","ok"))});
+
 loadFields();
+renderAcct();
+returnFromCheckout().then(refreshBalance);
 })();
 </script>
 
