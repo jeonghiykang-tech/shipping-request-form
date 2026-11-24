@@ -185,8 +185,9 @@ button:disabled{opacity:.5;cursor:not-allowed}
       <p class="sub">Fill the request once. The commercial invoice, bill of lading and USMCA certification are built from the same data, so value, origin and weights match on every document. Filling and checking are free; creating the documents is US$1 per shipment.</p>
     </div>
     <div class="tools">
-      <button id="btn-sample" class="ghost" type="button">Load MRO example</button>
-      <button id="btn-sample2" class="ghost" type="button">Load export-control example</button>
+      <button id="btn-sample" class="ghost" type="button">Load general example</button>
+      <button id="btn-sample-us" class="ghost" type="button">Export control: U.S. example</button>
+      <button id="btn-sample-ca" class="ghost" type="button">Export control: Canada example</button>
       <button id="btn-new" class="ghost" type="button">New blank request</button>
       <button id="btn-io" class="ghost" type="button">Copy / paste data</button>
     </div>
@@ -224,7 +225,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 
   <div id="tab-form" class="grid">
     <div class="stack">
-      <p class="example" id="example-note" hidden>This request is filled with example data. Classifications in the export-control example come from a distributor's published list and depend on frame rate and model; confirm against the manufacturer's classification before use. Choose “New blank request” to start your own.</p>
+      <p class="example" id="example-note" hidden>This request is filled with example data. Company names are made up. In the export-control examples, the camera-core ECCN and USML values come from a distributor's published list and depend on frame rate and model, and the Canadian ECL entries are illustrations. Confirm every classification with the manufacturer or Global Affairs Canada before use. HTS codes are left blank where they were not verified. Choose “New blank request” to start your own.</p>
 
       <section class="panel">
         <h2>Requestor <small>The department sending the goods owns the data on this form</small></h2>
@@ -248,6 +249,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
           <label class="f"><span>Phone</span><input id="shp_phone" data-k="shp_phone"></label>
           <label class="f"><span>Email</span><input id="shp_email" data-k="shp_email" type="email"></label>
           <label class="f"><span class="req">Tax ID (BN / EIN / RFC)</span><input id="shp_tax" data-k="shp_tax" class="mono"></label>
+          <label class="f"><span class="req">Exporting from</span><select id="orig" data-k="orig"><option value="">Select</option><option value="CA">Canada</option><option value="US">United States</option><option value="MX">Mexico</option></select></label>
         </div>
       </section>
 
@@ -459,33 +461,43 @@ button:disabled{opacity:.5;cursor:not-allowed}
 const KEY="xb-ship-request-v1";
 const KG_LB=2.20462;
 const blankItem=()=>({part:"",desc:"",hts:"",coo:"",qty:"",uom:"EA",unit:"",src:"",kg:"",pkgs:"",ptype:"Skid",nmfc:"",usmca:"No",crit:"",eccn:"EAR99",itar:"",eclg:"",eclc:"",ecli:"",hz:"No"});
-const blank=()=>({req_name:"",req_dept:"",req_email:"",req_phone:"",req_date:"",ship_date:"",shp_co:"",shp_contact:"",shp_addr:"",shp_phone:"",shp_tax:"",con_co:"",con_contact:"",con_addr:"",con_phone:"",con_email:"",con_tax:"",dest:"",ior_same:true,ior_co:"",ior_tax:"",ior_addr:"",reason:"",inco:"",inco_place:"",cur:"CAD",inv_no:"",po:"",related:"",port:"",freight:"",insur:"",other_chg:"",broker:"",mode:"",carrier:"",scac:"",pro:"",bol_no:"",seal:"",fterms:"",billto:"",instr:"",gross_kg:"",r_export:false,r_decl:false,r_notice:false,r_ref:"",sig_name:"",sig_title:"",notes:"",shp_email:"",cert_role:"",cert_name:"",cert_title:"",cert_phone:"",cert_email:"",cert_co:"",cert_addr:"",prod_mode:"Same as exporter",prod_co:"",prod_addr:"",prod_phone:"",prod_email:"",bl_from:"",bl_to:"",cert_date:"",us_auth:"",ca_permit:"",items:[blankItem()],_example:false});
-const sample2=()=>Object.assign(blank(),{req_name:"Alex Chen",req_dept:"Engineering (machine)",req_email:"a.chen@example-imaging.ca",req_phone:"519-555-0177",req_date:"2026-10-28",ship_date:"2026-10-30",
- shp_co:"Example Imaging Systems Inc.",shp_contact:"Shipping Office",shp_addr:"300 Example Pkwy\nWaterloo, ON N2L 0A1\nCanada",shp_phone:"519-555-0170",shp_email:"shipping@example-imaging.ca",shp_tax:"987654321RM0001",
+const blank=()=>({req_name:"",req_dept:"",req_email:"",req_phone:"",req_date:"",ship_date:"",shp_co:"",shp_contact:"",shp_addr:"",shp_phone:"",shp_tax:"",orig:"",con_co:"",con_contact:"",con_addr:"",con_phone:"",con_email:"",con_tax:"",dest:"",ior_same:true,ior_co:"",ior_tax:"",ior_addr:"",reason:"",inco:"",inco_place:"",cur:"CAD",inv_no:"",po:"",related:"",port:"",freight:"",insur:"",other_chg:"",broker:"",mode:"",carrier:"",scac:"",pro:"",bol_no:"",seal:"",fterms:"",billto:"",instr:"",gross_kg:"",r_export:false,r_decl:false,r_notice:false,r_ref:"",sig_name:"",sig_title:"",notes:"",shp_email:"",cert_role:"",cert_name:"",cert_title:"",cert_phone:"",cert_email:"",cert_co:"",cert_addr:"",prod_mode:"Same as exporter",prod_co:"",prod_addr:"",prod_phone:"",prod_email:"",bl_from:"",bl_to:"",cert_date:"",us_auth:"",ca_permit:"",items:[blankItem()],_example:false});
+const sampleGeneral=()=>Object.assign(blank(),{req_name:"Sofia Martins",req_dept:"Other",req_email:"s.martins@example-pack.ca",req_phone:"905-555-0121",req_date:"2026-11-23",ship_date:"2026-11-25",
+ shp_co:"Example Flexible Packaging Ltd.",shp_contact:"Shipping Office",shp_addr:"40 Example Dr\nConcord, ON L4K 0A1\nCanada",shp_phone:"905-555-0120",shp_email:"shipping@example-pack.ca",shp_tax:"123456789RM0001",orig:"CA",
+ con_co:"Example Snack Foods Inc.",con_contact:"Receiving",con_addr:"1200 Example Blvd\nBuffalo, NY 14206\nUnited States",con_phone:"716-555-0188",con_email:"receiving@example-snacks.com",con_tax:"16-1234567",dest:"US",ior_same:true,
+ reason:"Sale",inco:"FCA",inco_place:"Concord, ON",cur:"USD",inv_no:"EFP-2026-1123",po:"PO-77310",related:"No",port:"Buffalo, NY (0901) – Peace Bridge",freight:"",broker:"Example Customs Brokers",
+ mode:"LTL",carrier:"Example Freight Lines",scac:"EXFL",pro:"PRO 5520 1123",bol_no:"BOL-1123-01",fterms:"Collect",instr:"Dock hours 07:00–15:00. Keep dry.",gross_kg:"465",
+ sig_name:"Sofia Martins",sig_title:"Customer Service Lead",
+ cert_role:"Exporter",cert_name:"Sofia Martins",cert_title:"Customer Service Lead",cert_phone:"905-555-0121",cert_email:"s.martins@example-pack.ca",prod_mode:"Same as exporter",cert_date:"2026-11-23",
+ items:[
+  {part:"SUP-12OZ-PR",desc:"Printed polyethylene stand-up pouches, 12 oz, no reclosable closure",hts:"3923.21.0095",coo:"CA",qty:"40000",uom:"PCS",unit:"0.11",src:"Price list 2026, PO-77310",kg:"320",pkgs:"2",ptype:"Skid",nmfc:"",usmca:"Yes",crit:"B",eccn:"",itar:"",eclg:"NC",eclc:"",ecli:"",hz:"No"},
+  {part:"CAP-33MM",desc:"Plastic spout caps, 33 mm",hts:"3923.50.0000",coo:"CA",qty:"40000",uom:"PCS",unit:"0.03",src:"Price list 2026, PO-77310",kg:"120",pkgs:"1",ptype:"Skid",nmfc:"",usmca:"Yes",crit:"B",eccn:"",itar:"",eclg:"NC",eclc:"",ecli:"",hz:"No"}],
+ _example:true});
+const sampleUSExport=()=>Object.assign(blank(),{req_name:"Jordan Reyes",req_dept:"Engineering (machine)",req_email:"j.reyes@example-optics.com",req_phone:"716-555-0144",req_date:"2026-11-23",ship_date:"2026-11-26",
+ shp_co:"Example Optics LLC",shp_contact:"Export Compliance",shp_addr:"500 Example Ave\nBuffalo, NY 14203\nUnited States",shp_phone:"716-555-0140",shp_email:"export@example-optics.com",shp_tax:"16-7654321",orig:"US",
+ con_co:"Example Imaging Systems Inc.",con_contact:"Receiving",con_addr:"300 Example Pkwy\nWaterloo, ON N2L 0A1\nCanada",con_phone:"519-555-0170",con_email:"receiving@example-imaging.ca",con_tax:"987654321RM0001",dest:"CA",ior_same:true,
+ reason:"Sale",inco:"DAP",inco_place:"Waterloo, ON",cur:"USD",inv_no:"EOL-2026-1123",po:"EIS-88120",related:"No",port:"Fort Erie, ON – Peace Bridge",freight:"95",broker:"Example Customs Brokers",
+ us_auth:"",ca_permit:"",mode:"Courier",carrier:"Example Courier",pro:"1Z EX4 2026 1123",bol_no:"BOL-1123-02",fterms:"Prepaid",gross_kg:"4.5",
+ sig_name:"Jordan Reyes",sig_title:"Export Compliance Lead",
+ items:[
+  {part:"BOSON-640-60HZ",desc:"Teledyne FLIR Boson 640 uncooled LWIR thermal camera core, 60 Hz (example)",hts:"",coo:"US",qty:"2",uom:"EA",unit:"4200",src:"Manufacturer inv. EX-1182",kg:"0.2",pkgs:"1",ptype:"Box",nmfc:"",usmca:"No",crit:"",eccn:"6A003.b.4.b",itar:"",eclg:"",eclc:"",ecli:"",hz:"No"},
+  {part:"BOSON-640-9HZ",desc:"Teledyne FLIR Boson 640 uncooled LWIR thermal camera core, 9 Hz (example)",hts:"",coo:"US",qty:"4",uom:"EA",unit:"2900",src:"Manufacturer inv. EX-1182",kg:"0.4",pkgs:"1",ptype:"Box",nmfc:"",usmca:"No",crit:"",eccn:"6A993",itar:"",eclg:"",eclc:"",ecli:"",hz:"No"},
+  {part:"QUARK-640-30HZ",desc:"FLIR Quark 640 LWIR thermal camera core, 30 Hz (example)",hts:"",coo:"US",qty:"1",uom:"EA",unit:"5500",src:"Manufacturer inv. EX-1190",kg:"0.1",pkgs:"1",ptype:"Box",nmfc:"",usmca:"No",crit:"",eccn:"",itar:"XII(c)",eclg:"",eclc:"",ecli:"",hz:"No"}],
+ _example:true});
+const sampleCAExport=()=>Object.assign(blank(),{req_name:"Alex Chen",req_dept:"Engineering (machine)",req_email:"a.chen@example-imaging.ca",req_phone:"519-555-0177",req_date:"2026-11-23",ship_date:"2026-11-26",
+ shp_co:"Example Imaging Systems Inc.",shp_contact:"Shipping Office",shp_addr:"300 Example Pkwy\nWaterloo, ON N2L 0A1\nCanada",shp_phone:"519-555-0170",shp_email:"shipping@example-imaging.ca",shp_tax:"987654321RM0001",orig:"CA",
  con_co:"Example Vision Labs LLC",con_contact:"Receiving",con_addr:"77 Example St\nBuffalo, NY 14202\nUnited States",con_phone:"716-555-0133",con_email:"receiving@example-vision.com",con_tax:"16-7654321",dest:"US",ior_same:true,
- reason:"Sale",inco:"FCA",inco_place:"Waterloo, ON",cur:"USD",inv_no:"EIS-2026-1028",po:"EV-40217",related:"No",port:"Buffalo, NY (0901) – Peace Bridge",freight:"85",broker:"Example Customs Brokers",
- us_auth:"",ca_permit:"",mode:"Courier",carrier:"Example Courier",pro:"1Z EX4 2026 1028",bol_no:"BOL-1028-01",fterms:"Prepaid",gross_kg:"4.5",
+ reason:"Sale",inco:"FCA",inco_place:"Waterloo, ON",cur:"USD",inv_no:"EIS-2026-1123",po:"EV-40217",related:"No",port:"Buffalo, NY (0901) – Peace Bridge",freight:"85",broker:"Example Customs Brokers",
+ us_auth:"",ca_permit:"",mode:"Courier",carrier:"Example Courier",pro:"1Z EX4 2026 1124",bol_no:"BOL-1123-03",fterms:"Prepaid",gross_kg:"9",
  sig_name:"Alex Chen",sig_title:"Export Compliance Lead",
  items:[
-  {part:"BOSON-640-60HZ",desc:"Teledyne FLIR Boson 640 uncooled LWIR thermal camera core, 60 Hz (example)",hts:"",coo:"US",qty:"2",uom:"EA",unit:"4200",src:"Distributor inv. EX-1182",kg:"0.2",pkgs:"1",ptype:"Box",nmfc:"",usmca:"No",crit:"",eccn:"6A003.b.4.b",itar:"",eclg:"1",eclc:"6",ecli:"1-6.A.3.b.4.b",hz:"No"},
-  {part:"BOSON-640-9HZ",desc:"Teledyne FLIR Boson 640 uncooled LWIR thermal camera core, 9 Hz (example)",hts:"",coo:"US",qty:"4",uom:"EA",unit:"2900",src:"Distributor inv. EX-1182",kg:"0.4",pkgs:"1",ptype:"Box",nmfc:"",usmca:"No",crit:"",eccn:"6A993",itar:"",eclg:"NC",eclc:"",ecli:"",hz:"No"},
-  {part:"QUARK-640-30HZ",desc:"FLIR Quark 640 LWIR thermal camera core, 30 Hz (example)",hts:"",coo:"US",qty:"1",uom:"EA",unit:"5500",src:"Distributor inv. EX-1190",kg:"0.1",pkgs:"1",ptype:"Box",nmfc:"",usmca:"No",crit:"",eccn:"",itar:"XII(c)",eclg:"",eclc:"",ecli:"",hz:"No"}],
- _example:true});
-const sample=()=>({req_name:"Daniel Moreau",req_dept:"MRO",req_email:"d.moreau@example-steel.ca",req_phone:"519-555-0142",req_date:"2026-10-27",ship_date:"2026-10-29",
- shp_co:"Example Steel Blanks Canada Inc.",shp_contact:"Shipping Office",shp_addr:"100 Example Rd\nWoodstock, ON N4S 0A1\nCanada",shp_phone:"519-555-0100",shp_tax:"123456789RM0001",
- con_co:"Example Steel Blanks USA LLC",con_contact:"Receiving",con_addr:"2500 Example Ave\nDetroit, MI 48201\nUnited States",con_phone:"313-555-0190",con_email:"receiving@example-steel.com",con_tax:"38-1234567",dest:"US",
- ior_same:true,ior_co:"",ior_tax:"",ior_addr:"",reason:"Repair and return",inco:"DAP",inco_place:"Detroit, MI",cur:"USD",inv_no:"WST-2026-1027",po:"MRO-55821",related:"Yes",port:"Detroit, MI (3801) – Ambassador Bridge",freight:"450",insur:"",other_chg:"",broker:"Example Customs Brokers",
- mode:"LTL",carrier:"Example Freight Lines",scac:"EXFL",pro:"PRO 7781 2209",bol_no:"BOL-1027-01",seal:"",fterms:"Prepaid",billto:"",instr:"Liftgate not required. Dock hours 07:00–15:00.",gross_kg:"212",
- r_export:false,r_decl:false,r_notice:false,r_ref:"",sig_name:"Daniel Moreau",sig_title:"MRO Supervisor",notes:"",shp_email:"shipping@example-steel.ca",
- cert_role:"Exporter",cert_name:"Priya Nair",cert_title:"Trade Compliance Specialist",cert_phone:"519-555-0155",cert_email:"p.nair@example-steel.ca",cert_co:"",cert_addr:"",prod_mode:"Same as exporter",prod_co:"",prod_addr:"",prod_phone:"",prod_email:"",bl_from:"",bl_to:"",cert_date:"2026-10-27",
- items:[
-  {part:"HYD-PMP-220",desc:"Hydraulic gear pump, used, sent for repair",hts:"8413.60.0090",coo:"DE",qty:"1",uom:"EA",unit:"3850",src:"Supplier inv. 44817",kg:"38",pkgs:"1",ptype:"Crate",nmfc:"85",usmca:"No",eccn:"EAR99",hz:"No"},
-  {part:"SRV-MTR-07",desc:"AC servo motor, used, sent for repair",hts:"8501.52.8040",coo:"JP",qty:"2",uom:"EA",unit:"1240",src:"Supplier inv. 90-3312",kg:"56",pkgs:"1",ptype:"Skid",nmfc:"85",usmca:"No",eccn:"EAR99",hz:"No"},
-  {part:"GRD-SHLD-3",desc:"Steel machine guard panel",hts:"7326.90.8688",coo:"CA",qty:"4",uom:"EA",unit:"",src:"",kg:"88",pkgs:"1",ptype:"Skid",nmfc:"70",usmca:"Yes",crit:"B",eccn:"EAR99",hz:"No"}],
+  {part:"TIM-640-60",desc:"Thermal imaging module with U.S.-origin Boson 640 core, 60 Hz (example)",hts:"",coo:"CA",qty:"2",uom:"EA",unit:"6800",src:"Bill of materials TIM-640 rev C",kg:"1.6",pkgs:"1",ptype:"Box",nmfc:"",usmca:"No",crit:"",eccn:"",itar:"",eclg:"1",eclc:"6",ecli:"1-6.A.3.b.4.b",hz:"No"},
+  {part:"TIM-640-9",desc:"Thermal imaging module with U.S.-origin Boson 640 core, 9 Hz (example)",hts:"",coo:"CA",qty:"4",uom:"EA",unit:"4100",src:"Bill of materials TIM-640 rev C",kg:"3.2",pkgs:"1",ptype:"Box",nmfc:"",usmca:"No",crit:"",eccn:"",itar:"",eclg:"NC",eclc:"",ecli:"",hz:"No"},
+  {part:"MNT-AL-02",desc:"Aluminium camera mounting bracket (example)",hts:"",coo:"CA",qty:"6",uom:"EA",unit:"45",src:"Price list 2026",kg:"2.4",pkgs:"1",ptype:"Box",nmfc:"",usmca:"No",crit:"",eccn:"",itar:"",eclg:"NC",eclc:"",ecli:"",hz:"No"}],
  _example:true});
 
 let S;
-try{const raw=localStorage.getItem(KEY);S=raw?JSON.parse(raw):sample();}catch(e){S=sample();}
+try{const raw=localStorage.getItem(KEY);S=raw?JSON.parse(raw):sampleGeneral();}catch(e){S=sampleGeneral();}
 S=Object.assign(blank(),S); if(!Array.isArray(S.items)||!S.items.length) S.items=[blankItem()];
 
 const $=id=>document.getElementById(id);
@@ -543,7 +555,7 @@ function bizDaysBetween(a,b){
 
 function checks(){
   const out=[];const E=m=>out.push(["err",m]),W=m=>out.push(["warn",m]);
-  const need=[["req_name","Requestor name"],["req_dept","Department"],["req_date","Date submitted"],["ship_date","Ship date"],["shp_co","Shipper company"],["shp_addr","Shipper address"],["shp_tax","Shipper tax ID"],["con_co","Consignee company"],["con_addr","Consignee address"],["con_email","Consignee email"],["con_tax","Consignee tax ID"],["dest","Destination country"],["reason","Reason for export"],["inco","Incoterms"],["inco_place","Incoterms named place"],["related","Related-party status"],["mode","Mode"],["carrier","Carrier"],["fterms","Freight terms"],["sig_name","Authorized signer"]];
+  const need=[["orig","Exporting from"],["req_name","Requestor name"],["req_dept","Department"],["req_date","Date submitted"],["ship_date","Ship date"],["shp_co","Shipper company"],["shp_addr","Shipper address"],["shp_tax","Shipper tax ID"],["con_co","Consignee company"],["con_addr","Consignee address"],["con_email","Consignee email"],["con_tax","Consignee tax ID"],["dest","Destination country"],["reason","Reason for export"],["inco","Incoterms"],["inco_place","Incoterms named place"],["related","Related-party status"],["mode","Mode"],["carrier","Carrier"],["fterms","Freight terms"],["sig_name","Authorized signer"]];
   const miss=need.filter(([k])=>!String(S[k]??"").trim()).map(([,l])=>l);
   if(miss.length)E("Missing: "+miss.join(", ")+".");
   if(!S.ior_same&&(!S.ior_co.trim()||!S.ior_tax.trim()))E("Importer of record company and number are required when the IOR differs from the consignee.");
@@ -567,13 +579,14 @@ function checks(){
     }
     const itar=(it.itar||"").trim(),eccn=(it.eccn||"").trim(),eg=it.eclg||"";
     if(itar&&eccn)E(`Line ${n}: has both a USML category (${itar}) and an ECCN (${eccn}). An item is subject to either the ITAR or the EAR, not both. Clear one.`);
-    if(!itar&&!eccn)W(`Line ${n}: no U.S. export classification. Enter the ECCN, EAR99, or the USML category.`);
+    const usRules=S.orig==="US"||/^US$/i.test((it.coo||"").trim()), caRules=S.orig==="CA";
+    if(!itar&&!eccn&&usRules)W(`Line ${n}: no U.S. export classification. ${S.orig==="US"?"U.S. exports":"U.S.-origin goods"} need the ECCN, EAR99, or the USML category.`);
     if(itar){
       if(!S.us_auth.trim())E(`Line ${n}: ITAR item (USML ${itar}). Enter the DDTC licence, agreement or exemption that covers this shipment, or note why none is needed. The commercial invoice must show it (22 CFR 123.9(b)).`);
       W(`Line ${n}: ITAR item in Canada. Confirm the Export Control List classification and that everyone handling it is registered or exempt under the Controlled Goods Program.`);
-      if(!eg)W(`Line ${n}: ECL group not entered for an ITAR item.`);
+      if(!eg&&caRules)W(`Line ${n}: ECL group not entered for an ITAR item exported from Canada.`);
     }
-    if(!eg)W(`Line ${n}: no Canadian Export Control List entry. Choose a group, or NC if the item is not controlled.`);
+    if(!eg&&caRules)W(`Line ${n}: no Canadian Export Control List entry. Choose a group, or NC if the item is not controlled.`);
     if(eg&&eg!=="NC"){
       if(!(it.ecli||"").trim())W(`Line ${n}: ECL group ${eg} selected but no ECL item number (e.g. 1-6.A.3, 2-15, 5400).`);
       if(!S.ca_permit.trim())W(`Line ${n}: ECL group ${eg}. Check whether a Global Affairs Canada export permit is needed for this destination, and enter it if one applies.`);
@@ -759,8 +772,9 @@ document.querySelectorAll("[data-goto]").forEach(b=>b.addEventListener("click",(
 
 /* toolbar */
 let pendingNew=false;
-$("btn-sample").addEventListener("click",()=>{S=Object.assign(blank(),sample());save();loadFields();});
-$("btn-sample2").addEventListener("click",()=>{S=sample2();save();loadFields();show("form");});
+$("btn-sample").addEventListener("click",()=>{S=sampleGeneral();save();loadFields();show("form");});
+$("btn-sample-us").addEventListener("click",()=>{S=sampleUSExport();save();loadFields();show("form");});
+$("btn-sample-ca").addEventListener("click",()=>{S=sampleCAExport();save();loadFields();show("form");});
 $("btn-new").addEventListener("click",e=>{
   if(!pendingNew){pendingNew=true;e.target.textContent="Clear all fields?";setTimeout(()=>{pendingNew=false;e.target.textContent="New blank request"},3500);return;}
   pendingNew=false;e.target.textContent="New blank request";S=blank();S.ior_same=true;save();loadFields();show("form");
