@@ -1,0 +1,747 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>U.S. Shipping Documents</title>
+<meta name="description" content="Free U.S. export and import document builder: commercial invoice, shipper's letter of instruction (SLI) with EAR and ITAR data, FTA certifications of origin, TIB, U.S. goods returned and repair declarations, and partner government agency (PGA) checklists.">
+<link rel="canonical" href="https://jeonghiykang-tech.github.io/shipping-request-form/us/">
+<meta name="author" content="Michelle Liu">
+<meta name="google-adsense-account" content="ca-pub-3091236865638643">
+<meta name="claude:viewport-fit-sides" content="cover">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3091236865638643" crossorigin="anonymous"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@600;700&display=swap">
+<style>
+/* Layout: one working column — sticky tab bar, form sections as plain panels, documents rendered as paper sheets */
+:root{
+  --bg:#f3f5f7; --panel:#ffffff; --fg:#17202b; --muted:#5b6876; --line:#d6dde4;
+  --accent:#1d4e89; --accent-ink:#ffffff; --accent-soft:#e3ecf7;
+  --stamp:#b3261e; --warn:#9a5b00; --warn-soft:#fff3dc; --ok:#1e6b3a; --ok-soft:#e2f3e8; --err-soft:#fbe4e2;
+  --paper:#ffffff; --ink:#111111; --paper-line:#222222; --paper-muted:#555555;
+  --f-display:"IBM Plex Sans Condensed","Arial Narrow",Arial,sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#11161c; --panel:#19212a; --fg:#e4e9ee; --muted:#98a5b3; --line:#2c3743;
+  --accent:#6fa3e0; --accent-ink:#0d1620; --accent-soft:#1d2d40;
+  --stamp:#ff8a80; --warn:#f0b65a; --warn-soft:#3a2c12; --ok:#7fd39b; --ok-soft:#163222; --err-soft:#3d1c1a;
+  color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --bg:#11161c; --panel:#19212a; --fg:#e4e9ee; --muted:#98a5b3; --line:#2c3743;
+  --accent:#6fa3e0; --accent-ink:#0d1620; --accent-soft:#1d2d40;
+  --stamp:#ff8a80; --warn:#f0b65a; --warn-soft:#3a2c12; --ok:#7fd39b; --ok-soft:#163222; --err-soft:#3d1c1a;
+  color-scheme:dark;}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:14px;line-height:1.45}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--panel)}
+.wrap{max-width:1120px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+header.top{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:end;justify-content:space-between;margin-bottom:16px}
+h1{font-family:var(--f-display);font-weight:700;font-size:28px;letter-spacing:.01em;margin:0;text-wrap:balance}
+.sub{color:var(--muted);margin:4px 0 0;max-width:62ch}
+.tools{display:flex;flex-wrap:wrap;gap:8px}
+button{font:inherit;cursor:pointer;border-radius:6px;border:1px solid var(--line);background:var(--panel);color:var(--fg);padding:7px 12px}
+button:hover{border-color:var(--accent)}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+button.ghost{background:transparent}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+nav.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;display:flex;gap:4px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:4px;margin-bottom:16px;overflow-x:auto}
+nav.tabs button{border:0;background:transparent;white-space:nowrap;padding:8px 14px;color:var(--muted);font-weight:500}
+nav.tabs button[aria-selected="true"]{background:var(--accent-soft);color:var(--fg);font-weight:600}
+nav.tabs .n{font-family:var(--f-mono);font-size:12px;margin-right:6px;color:var(--accent)}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:16px;align-items:start}
+@media (max-width:900px){.grid{grid-template-columns:minmax(0,1fr)}}
+section.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:16px;display:grid;gap:12px}
+.stack{display:grid;gap:16px;min-width:0}
+h2{font-family:var(--f-display);font-size:16px;letter-spacing:.06em;text-transform:uppercase;margin:0;display:flex;gap:8px;align-items:baseline}
+h2 small{font-family:var(--f-body);text-transform:none;letter-spacing:0;font-weight:400;color:var(--muted);font-size:13px}
+.fields{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px 12px}
+.fields .wide{grid-column:1/-1}
+label.f{display:grid;gap:3px;font-size:12px;color:var(--muted);font-weight:500;letter-spacing:.02em;min-width:0}
+label.f .req::after{content:" *";color:var(--stamp)}
+input,select,textarea{font:inherit;font-size:14px;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:5px;padding:6px 8px;width:100%;min-width:0}
+textarea{resize:vertical;min-height:56px}
+.mono{font-family:var(--f-mono)}
+.check{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--fg)}
+.check input{width:auto}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:6px}
+table.items{border-collapse:collapse;width:100%;min-width:1560px;font-size:13px}
+table.items th{background:var(--accent-soft);text-align:left;font-weight:600;font-size:11px;letter-spacing:.04em;text-transform:uppercase;padding:6px;border-bottom:1px solid var(--line);white-space:nowrap}
+table.items td{padding:4px;border-bottom:1px solid var(--line);vertical-align:top}
+table.items input,table.items select{padding:4px 6px;font-size:13px}
+table.items td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;padding-top:9px}
+.rowdel{padding:4px 8px;color:var(--stamp)}
+.totals{display:flex;flex-wrap:wrap;gap:8px 24px;font-variant-numeric:tabular-nums;font-size:13px;color:var(--muted)}
+.totals b{color:var(--fg)}
+aside.checks{position:sticky;top:calc(env(safe-area-inset-top,0px) + 70px);background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px;display:grid;gap:10px}
+@media (max-width:900px){aside.checks{position:static}}
+.status{font-family:var(--f-display);font-weight:700;font-size:15px;letter-spacing:.04em;text-transform:uppercase;padding:6px 10px;border-radius:5px;border:2px solid currentColor;justify-self:start}
+.status.ok{color:var(--ok)} .status.warn{color:var(--warn)} .status.err{color:var(--stamp)}
+ul.issues{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+ul.issues li{font-size:13px;padding:6px 8px;border-radius:5px;border-left:3px solid}
+ul.issues li.err{background:var(--err-soft);border-color:var(--stamp)}
+ul.issues li.warn{background:var(--warn-soft);border-color:var(--warn)}
+ul.issues li.ok{background:var(--ok-soft);border-color:var(--ok)}
+.hint{font-size:12px;color:var(--muted)}
+.example{font-size:12px;background:var(--warn-soft);color:var(--fg);border-radius:5px;padding:6px 10px}
+/* paper documents */
+.docbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;margin-bottom:12px}
+.paperwrap{overflow-x:auto;padding-bottom:8px}
+.paper{background:var(--paper);color:var(--ink);width:816px;min-height:1056px;margin:0 auto;padding:40px 44px;box-shadow:0 1px 3px rgba(0,0,0,.18),0 8px 24px rgba(0,0,0,.08);font-family:var(--f-body);font-size:11px;line-height:1.35}
+.paper h3{font-family:var(--f-display);font-size:24px;letter-spacing:.08em;text-transform:uppercase;margin:0}
+.paper .dochead{display:flex;justify-content:space-between;align-items:start;gap:16px;border-bottom:2px solid var(--paper-line);padding-bottom:8px;margin-bottom:10px}
+.paper .meta{display:grid;grid-template-columns:auto auto;gap:1px 12px;font-size:11px}
+.paper .meta dt{color:var(--paper-muted);text-transform:uppercase;font-size:9px;letter-spacing:.06em;align-self:center}
+.paper .meta dd{margin:0;font-family:var(--f-mono);font-weight:500}
+.boxes{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--paper-line);border-bottom:0}
+.boxes>div{padding:6px 8px;border-bottom:1px solid var(--paper-line);min-height:64px}
+.boxes>div:nth-child(odd){border-right:1px solid var(--paper-line)}
+.boxes.three{grid-template-columns:1fr 1fr 1fr}
+.boxes.three>div{border-right:1px solid var(--paper-line)}
+.boxes.three>div:nth-child(3n){border-right:0}
+.boxes.four{grid-template-columns:repeat(4,1fr)}
+.boxes.four>div{border-right:1px solid var(--paper-line);min-height:40px}
+.boxes.four>div:nth-child(4n){border-right:0}
+.lbl{display:block;font-size:8.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--paper-muted);margin-bottom:2px;font-weight:600}
+.val{white-space:pre-line}
+table.doc{width:100%;border-collapse:collapse;margin-top:10px;font-size:10px}
+table.doc th{border:1px solid var(--paper-line);background:#eeeeee;padding:4px;font-size:8.5px;text-transform:uppercase;letter-spacing:.04em;text-align:left;vertical-align:bottom}
+table.doc td{border:1px solid var(--paper-line);padding:4px;vertical-align:top}
+table.doc td.r,table.doc th.r{text-align:right;font-variant-numeric:tabular-nums}
+table.doc td.m{font-family:var(--f-mono);font-size:9.5px}
+table.doc tfoot td{font-weight:700}
+.sumgrid{display:grid;grid-template-columns:1fr 260px;gap:12px;margin-top:10px}
+.sumtbl{border:1px solid var(--paper-line);font-size:10.5px}
+.sumtbl div{display:flex;justify-content:space-between;padding:3px 8px;border-bottom:1px solid #cccccc;font-variant-numeric:tabular-nums}
+.sumtbl div:last-child{border-bottom:0;font-weight:700;background:#eeeeee}
+.decl{margin-top:12px;border:1px solid var(--paper-line);padding:8px;font-size:10px}
+.decl p{margin:0 0 6px}
+.sig{display:grid;grid-template-columns:2fr 1.4fr 1fr;gap:16px;margin-top:22px}
+.sig div{border-top:1px solid var(--paper-line);padding-top:3px;font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:var(--paper-muted)}
+.sig div span{display:block;color:var(--ink);text-transform:none;letter-spacing:0;font-size:11px;margin-top:-16px;margin-bottom:6px;min-height:14px}
+.flag{display:inline-block;border:1.5px solid var(--stamp);color:var(--stamp);font-family:var(--f-display);font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-size:10px;padding:1px 6px;margin:2px 4px 0 0}
+.paper .foot{margin-top:14px;font-size:8.5px;color:var(--paper-muted)}
+.xcol{text-align:center;font-weight:700}
+.io{display:grid;gap:8px}
+.io textarea{font-family:var(--f-mono);font-size:12px;min-height:120px}
+.adbox{margin-top:32px;border-top:1px solid var(--line);padding-top:12px;min-height:100px}
+.adbox .lbl-ad{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.sitefoot{margin-top:24px;color:var(--muted);font-size:13px;display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:space-between}
+.sitefoot a{color:var(--accent)}
+@media print{
+  body{background:#fff} body::before,header.top,nav.tabs,.docbar,aside.checks,#tab-form,.adbox,.sitefoot{display:none!important}
+  .wrap{padding:0;max-width:none} .paper{box-shadow:none;margin:0;width:auto;min-height:0;padding:0}
+  .paperwrap{overflow:visible}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+<style>
+.modes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:12px}
+@media (max-width:760px){.modes{grid-template-columns:minmax(0,1fr)}}
+.mode{display:grid;gap:2px;text-align:left;padding:10px 14px;border:1px solid var(--line);border-radius:8px;background:var(--panel)}
+.mode b{font-family:var(--f-display);font-size:15px;letter-spacing:.03em}
+.mode span{font-size:12px;color:var(--muted)}
+.mode[aria-pressed="true"]{border:2px solid var(--accent);background:var(--accent-soft)}
+.mode .n{font-family:var(--f-mono);color:var(--accent);font-size:12px}
+.loadex{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.loadex{flex:1 1 220px;min-width:0}
+.loadex select{width:100%;min-width:0}
+#form{display:grid;gap:16px}
+table.doc td.c,table.doc th.c{text-align:center}
+.paper .sec{font-family:var(--f-display);font-size:12px;letter-spacing:.08em;text-transform:uppercase;margin:14px 0 4px;padding:3px 6px;background:#eeeeee;border:1px solid var(--paper-line)}
+.paper .note{font-size:9.5px;color:var(--paper-muted);margin:6px 0 0}
+.paper ul.cl{margin:4px 0 0;padding-left:16px}
+.paper ul.cl li{margin:2px 0}
+.tick{display:inline-block;width:10px;height:10px;border:1px solid var(--paper-line);margin-right:4px;vertical-align:-1px}
+.tick.on{background:var(--ink)}
+.sitefoot{margin-top:24px;color:var(--muted);font-size:13px;display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:space-between}
+.sitefoot a{color:var(--accent)}
+.sel{user-select:all}
+a.btnlink{display:inline-flex;align-items:center;font:inherit;font-size:14px;border-radius:6px;border:1px solid var(--line);color:var(--fg);padding:7px 12px;text-decoration:none}
+a.btnlink:hover{border-color:var(--accent)}
+@media print{.modes,.loadex,.adbox,.sitefoot{display:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>U.S. Shipping Documents</h1>
+      <p class="sub">Choose what you are shipping, fill one request, and get the matching documents: commercial invoice, shipper's letter of instruction, FTA certification of origin, return and repair declarations, TIB worksheet and a partner government agency checklist.</p>
+    </div>
+    <div class="tools">
+      <span class="loadex"><select id="exsel" aria-label="Example"><option value="">Load an example…</option></select></span>
+      <button id="btn-new" class="ghost" type="button">New blank request</button>
+      <a class="ghost btnlink" href="../">Canada–U.S. form</a>
+    </div>
+  </header>
+
+  <div class="modes" role="group" aria-label="Shipment type">
+    <button type="button" class="mode" data-mode="exp"><span class="n">1</span><b>U.S. export</b><span>EAR classification, SLI and FTA certification</span></button>
+    <button type="button" class="mode" data-mode="ctl"><span class="n">2</span><b>U.S. export control</b><span>ITAR and EAR, SLI with State Department data, FTA certification</span></button>
+    <button type="button" class="mode" data-mode="imp"><span class="n">3</span><b>U.S. import</b><span>TIB, goods returned, repairs, FTA claim and other agency documents</span></button>
+  </div>
+
+  <nav class="tabs" role="tablist" aria-label="Documents" id="tabs"></nav>
+
+  <div id="tab-form" class="grid">
+    <div class="stack">
+      <p class="example" id="example-note" hidden>Example data with made-up companies. Classifications are illustrations; confirm every HTS / Schedule B number, ECCN, USML category and agency requirement before use. Choose “New blank request” to start your own.</p>
+      <div id="form"></div>
+      <section class="panel">
+        <h2>Goods <small id="goods-hint"></small></h2>
+        <div class="tablewrap"><table class="items" aria-label="Line items"><thead id="items-head"></thead><tbody id="items"></tbody></table></div>
+        <div class="tools"><button type="button" id="add-row">Add line</button></div>
+        <div class="totals" id="totals"></div>
+      </section>
+    </div>
+    <aside class="checks" aria-live="polite">
+      <h2>Compliance check</h2>
+      <div id="status" class="status"></div>
+      <ul class="issues" id="issues"></ul>
+      <p class="hint">Checks look for missing or inconsistent entries. They are not a classification, licensing, origin or agency determination.</p>
+    </aside>
+  </div>
+  <div id="docs"></div>
+
+  <div class="adbox" aria-label="Advertisement">
+    <span class="lbl-ad">Advertisement</span>
+    <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3091236865638643" data-ad-format="auto" data-full-width-responsive="true"></ins>
+    <script>try{(adsbygoogle=window.adsbygoogle||[]).push({});}catch(e){}</script>
+  </div>
+  <footer class="sitefoot">
+    <span>By <a href="https://jeonghiykang-tech.github.io/">Michelle Liu</a>, Canada–U.S. trade compliance (CCS, CTCS) · Custom versions: <span class="sel">jeonghiykang@gmail.com</span></span>
+    <span>Your data stays in your browser. Checks are not legal advice or a customs broker's service.</span>
+  </footer>
+</div>
+
+<script>
+(function(){
+const KEY="xb-us-docs-v1", KG_LB=2.20462;
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const num=v=>{const n=parseFloat(v);return isFinite(n)?n:0};
+const fmt=(v,d=2)=>v.toLocaleString("en-US",{minimumFractionDigits:d,maximumFractionDigits:d});
+const money=(v,c)=>{try{return new Intl.NumberFormat("en-US",{style:"currency",currency:c||"USD",currencyDisplay:"code"}).format(v)}catch(e){return (c||"")+" "+v.toFixed(2)}};
+const pl=(...a)=>a.filter(Boolean).join("\n");
+const digits=s=>String(s||"").replace(/\D/g,"");
+
+/* ---------- reference data ---------- */
+const FTA={
+ AU:["Australia","United States–Australia Free Trade Agreement","AU"],
+ BH:["Bahrain","United States–Bahrain Free Trade Agreement","BH"],
+ CL:["Chile","United States–Chile Free Trade Agreement","CL"],
+ CO:["Colombia","United States–Colombia Trade Promotion Agreement","CO"],
+ CR:["Costa Rica","CAFTA-DR","P"],DO:["Dominican Republic","CAFTA-DR","P"],SV:["El Salvador","CAFTA-DR","P"],
+ GT:["Guatemala","CAFTA-DR","P"],HN:["Honduras","CAFTA-DR","P"],NI:["Nicaragua","CAFTA-DR","P"],
+ IL:["Israel","United States–Israel Free Trade Area Agreement","IL"],
+ JO:["Jordan","United States–Jordan Free Trade Agreement","JO"],
+ KR:["Korea","United States–Korea Free Trade Agreement (KORUS)","KR"],
+ MA:["Morocco","United States–Morocco Free Trade Agreement","MA"],
+ OM:["Oman","United States–Oman Free Trade Agreement","OM"],
+ PA:["Panama","United States–Panama Trade Promotion Agreement","PA"],
+ PE:["Peru","United States–Peru Trade Promotion Agreement","PE"],
+ SG:["Singapore","United States–Singapore Free Trade Agreement","SG"],
+ CA:["Canada","USMCA / CUSMA","S"],MX:["Mexico","USMCA / T-MEC","S"]};
+const OTHER_C={CN:"China",JP:"Japan",TW:"Taiwan",VN:"Vietnam",IN:"India",TH:"Thailand",MY:"Malaysia",ID:"Indonesia",PH:"Philippines",DE:"Germany",GB:"United Kingdom",FR:"France",IT:"Italy",NL:"Netherlands",BE:"Belgium",ES:"Spain",IE:"Ireland",SE:"Sweden",PL:"Poland",CH:"Switzerland",TR:"Türkiye",BR:"Brazil",AR:"Argentina",ZA:"South Africa",AE:"United Arab Emirates",OT:"Other"};
+const COUNTRIES=Object.assign({},...Object.entries(FTA).map(([k,v])=>({[k]:v[0]})),OTHER_C);
+const cname=c=>COUNTRIES[c]||c||"";
+const STATES="AL AK AZ AR CA CO CT DE DC FL GA HI ID IL IN IA KS KY LA ME MD MA MI MN MS MO MT NE NV NH NJ NM NY NC ND OH OK OR PA PR RI SC SD TN TX UT VT VA WA WV WI WY".split(" ");
+
+const PGA={
+ food:{l:"Food, beverages, dietary supplements",a:"FDA",d:["Prior Notice confirmation number, filed before arrival: 2 h by road, 4 h by air or rail, 8 h by water","FDA registration number of the food facility","FDA product code"],c:"21 CFR 1.279"},
+ device:{l:"Medical devices",a:"FDA (CDRH)",d:["Establishment registration and device listing numbers","510(k) or PMA number where the device needs one","FDA product code"],c:"21 CFR Part 807"},
+ radiation:{l:"Radiation-emitting electronic products (lasers, X-ray, microwave, UV, etc.)",a:"FDA (CDRH)",d:["Form FDA 2877 declaration (A, B, C or D) for products subject to a radiation performance standard","Manufacturer's accession number for the product report","FDA product code"],c:"FDA, Importing Radiation-Emitting Electronic Products"},
+ drug:{l:"Drugs and cosmetics",a:"FDA",d:["Drug listing / NDC and facility registration for drugs","FDA product code","Controlled substances also need DEA authorization"],c:"21 CFR Part 207"},
+ nuclear:{l:"Radioactive material and nuclear equipment",a:"NRC",d:["NRC import authorization: general license under 10 CFR 110.27 or a specific import license","Consignee meets domestic possession and use licensing requirements"],c:"10 CFR Part 110"},
+ steel:{l:"Steel mill products",a:"Commerce (ITA)",d:["SIMA steel import license number, before the entry summary (file up to 60 days ahead; valid 75 days)","Country of melt and pour","Mill test certificate on file (shows where the steel was melted and poured)","Section 232 duty review"],c:"19 CFR Part 360"},
+ alum:{l:"Aluminum products",a:"Commerce (ITA)",d:["AIM aluminum import license number before the entry summary","Countries of largest and second-largest smelt, and most recent cast","Section 232 duty review"],c:"19 CFR Part 361"},
+ plant:{l:"Wood, plants and plant products",a:"USDA APHIS",d:["Lacey Act declaration (PPQ Form 505 or electronic) for covered plant products: genus, species, country of harvest","Phytosanitary certificate for live plants and seeds","ISPM 15 mark on wood packaging"],c:"16 U.S.C. 3372(f); 7 CFR 319.40-3"},
+ meat:{l:"Meat, poultry and egg products",a:"USDA FSIS",d:["Foreign inspection certificate from the exporting country","FSIS Form 9540-1 Import Inspection Application","Eligible country and certified establishment"],c:"9 CFR Parts 327, 381, 590"},
+ chem:{l:"Chemical substances and mixtures",a:"EPA",d:["TSCA certification on the entry: positive (complies) or negative (not subject)"],c:"19 CFR 12.121"},
+ pest:{l:"Pesticides and pesticide devices",a:"EPA",d:["Notice of Arrival of Pesticides and Devices (EPA Form 3540-1), approved before arrival"],c:"19 CFR 12.112"},
+ vehicle:{l:"Motor vehicles and engines",a:"EPA and NHTSA",d:["EPA Form 3520-1 (vehicles and engines)","DOT Form HS-7 declaration (safety standards)"],c:"40 CFR Part 85; 19 CFR 12.80"},
+ vequip:{l:"Motor vehicle equipment (tires, glazing, lamps, helmets, etc.)",a:"NHTSA",d:["DOT Form HS-7 declaration for equipment covered by a safety standard"],c:"19 CFR 12.80"},
+ rf:{l:"Radio-frequency devices",a:"FCC",d:["Equipment authorization: FCC ID (certification) or Supplier's Declaration of Conformity","Keep proof on file. FCC Form 740 is no longer filed (ended November 2, 2017)"],c:"47 CFR Part 2, Subpart K"},
+ cpsc:{l:"Consumer and children's products",a:"CPSC",d:["Certificate of compliance: GCC, or CPC for children's products","eFiled in ACE for regulated consumer products (in effect since July 8, 2026)"],c:"16 CFR Part 1110"},
+ arms:{l:"Firearms, ammunition, implements of war",a:"ATF",d:["ATF Form 6 import permit approved before import","ATF Form 6A release and receipt"],c:"27 CFR Parts 447, 478"},
+ alcohol:{l:"Alcoholic beverages",a:"TTB (and FDA)",d:["Federal Basic Permit as importer","Certificate of Label Approval (COLA)","FDA Prior Notice also applies"],c:"27 U.S.C. 203; 27 CFR Parts 4, 5, 7"},
+ wildlife:{l:"Fish, wildlife and wildlife products",a:"U.S. Fish & Wildlife Service",d:["FWS Form 3-177 declaration","CITES permits for listed species","Entry through a designated port"],c:"50 CFR Part 14"}};
+const PGA_HINT=[[/^72/,"steel"],[/^730[1-6]/,"steel"],[/^76/,"alum"],[/^44|^9403[3-6]/,"plant"],[/^0[24]|^1601|^1602/,"meat"],[/^0[3-9]|^1[0-9]|^2[01]/,"food"],[/^220[3-8]/,"alcohol"],[/^30/,"drug"],[/^33/,"drug"],[/^2844/,"nuclear"],[/^3808/,"pest"],[/^2[89]/,"chem"],[/^870[1-5]|^8711/,"vehicle"],[/^4011|^8708|^8512|^6506/,"vequip"],[/^851[78]|^852[5-8]/,"rf"],[/^9018|^9019|^9021/,"device"],[/^9022|^9013|^8514/,"radiation"],[/^93/,"arms"],[/^9503|^9504|^9505/,"cpsc"]];
+const pgaHint=hts=>{const d=digits(hts);for(const [re,k] of PGA_HINT)if(re.test(d))return k;return ""};
+const TIB={"9813.00.05":["Articles to be repaired, altered or processed",2],"9813.00.20":["Samples solely for taking orders",1.1],"9813.00.30":["Articles solely for testing, experimental or review purposes",2],"9813.00.50":["Professional equipment and tools of trade",1.1]};
+
+/* ---------- form definition ---------- */
+const E=["exp","ctl"],I=["imp"],ALL=["exp","ctl","imp"];
+const norm=f=>{let [k,l,t,sh,req]=f;if(sh===1&&req===undefined)req=1;return [k,l,t,sh,req]};
+const sel=(o)=>"sel:"+o;
+const FIELDS=[
+ {s:"Requestor",t:{all:"The person or department asking for the shipment"},f:[
+  ["req_name","Requestor name",,1],["req_dept","Department",sel("|Engineering|Maintenance (MRO)|Materials|Quality|Sales|Purchasing|R&D|Other"),1],["req_email","Email"],["req_date","Date submitted","date",1],["ship_date","Ship / arrival date","date",1]]},
+ {s:{exp:"U.S. principal party in interest (USPPI) / exporter",ctl:"U.S. principal party in interest (USPPI) / exporter",imp:"Seller / foreign shipper"},f:[
+  ["shp_co","Company",,1],["shp_contact","Contact"],["shp_addr","Address","area",1],["shp_phone","Phone"],["shp_email","Email"],
+  ["shp_tax",{exp:"USPPI EIN (IRS employer ID)",ctl:"USPPI EIN (IRS employer ID)",imp:"Seller tax ID / MID (optional)"},"mono",E,E],
+  ["state_origin","U.S. state of origin",sel("|"+STATES.join("|")),E,E],
+  ["shp_country","Country of export","country",I,I]]},
+ {s:{exp:"Ultimate consignee",ctl:"Ultimate consignee",imp:"Buyer / ship-to in the U.S."},f:[
+  ["con_co","Company",,1],["con_contact","Contact"],["con_addr","Address","area",1],["con_phone","Phone"],["con_email","Email"],["con_tax","Tax ID"],
+  ["con_type","Ultimate consignee type",sel("|Direct consumer|Government entity|Reseller|Other / unknown"),E,E],
+  ["dest","Country of ultimate destination","country",E,E]]},
+ {s:"Intermediate consignee",m:E,o:1,f:[["int_co","Company (if any)"],["int_addr","Address","area"]]},
+ {s:"Importer of record",m:I,f:[["ior_same","Same as buyer / ship-to","check"],["ior_co","Importer of record",,"ior","ior"],["ior_no","IOR number (EIN or CBP-assigned)","mono",I,I],["ior_addr","Address","area","ior"],["broker","Customs broker"],["bond","Customs bond",sel("|Continuous bond|Single transaction bond"),I,I]]},
+ {s:"Terms",f:[["inco","Incoterms® 2020",sel("|EXW|FCA|CPT|CIP|DAP|DPU|DDP|FAS|FOB|CFR|CIF"),1],["inco_place","Named place",,1],["cur","Currency",sel("USD|CAD|MXN|EUR|KRW|JPY|GBP"),1],["inv_no","Invoice number","mono",1],["po","PO / reference","mono"],["related","Buyer and seller related?",sel("|No|Yes"),1],["freight","Freight","number"],["insur","Insurance","number"],["other_chg","Other charges","number"]]},
+ {s:"Transportation",f:[["tmode","Method of transportation",sel("|Truck|Air|Ocean (containerized)|Ocean (non-containerized)|Rail|Courier|Mail"),1],["carrier","Carrier",,1],["scac","SCAC / carrier code","mono"],["pro","PRO / tracking / AWB","mono"],["bol_no","Bill of lading no.","mono"],
+  ["port",{exp:"Port of export",ctl:"Port of export",imp:"Port of entry"},,1],["routed","Routed export transaction?",sel("|No|Yes"),E,E],["fwd_co","Forwarding agent / authorized agent",,E],["fwd_ein","Agent EIN","mono",E],["hazmat","Hazardous materials?",sel("No|Yes"),1]]},
+ {s:"Electronic Export Information (EEI / AES)",m:E,f:[["eei_filer","Who files the EEI?",sel("|Forwarding agent files for the USPPI|USPPI files|Not required (exemption)"),E,E],
+  ["eei_ex","Exemption",sel("|NOEEI 15 CFR 30.37(a) — value $2,500 or less per Schedule B, no license|NOEEI 15 CFR 30.36 — shipment to Canada, no license or ITAR|Other exemption (enter below)"),"eex","eex"],["eei_other","Other exemption citation","mono","eex"],["itn","ITN (AES confirmation)","mono","itn"]]},
+ {s:"ITAR (U.S. Department of State)",m:["ctl"],f:[["ddtc","DDTC registration code","mono",["ctl"],"itarreq"],["itar_auth","License number or exemption citation","mono",["ctl"],"itarreq"],["itar_elig","Eligible party certification made","check"],["itar_note","Notes for the forwarder","area"]]},
+ {s:"Entry type",m:I,f:[["ekind","Entry type",sel("consumption|tib|usret|forret|repair"),I,I],
+  ["tib_sub","TIB subheading",sel("|"+Object.keys(TIB).join("|")),"tib","tib"],["est_duty","Estimated duties and fees if entered for consumption (USD)","number","tib","tib"],["tib_use","Statement of intended use","area","tib","tib"],
+  ["exp_date","Date exported from the U.S.","date","ret","ret"],["exp_ref","U.S. export reference (ITN, invoice or BOL)","mono","ret","ret"],
+  ["prior_entry","Prior U.S. import entry number","mono","forret","forret"],["prior_date","Prior entry date","date","forret"],["lease_ref","Lease or use agreement reference",,"forret"],
+  ["rep_co","Foreign repairer",,"repair","repair"],["rep_addr","Repairer address","area","repair"],["warranty","Repair made under warranty?",sel("|No|Yes"),"repair","repair"],["rep_desc","Repairs or alterations performed","area","repair","repair"],["rep_cost","Full cost (or value) of repairs","number","repair","repair"],["rep_after","Total value after repair","number","repair"]]},
+ {s:"FTA certification of origin",m:ALL,cond:"fta",f:[["cert_role","Certifier is the",sel("|Exporter|Producer|Importer"),"fta","fta"],["cert_name","Certifier name",,"fta","fta"],["cert_title","Title",,"fta"],["cert_co","Company (blank = from parties)",,"fta"],["cert_phone","Phone",,"fta","fta"],["cert_email","Email",,"fta","fta"],["cert_addr","Address (blank = from parties)","area","fta"],
+  ["prod_mode","Producer",sel("Same as exporter|Various|Available upon request by the importing authorities|Other producer"),"fta"],["prod_co","Producer company",,"prodother","prodother"],["prod_addr","Producer address","area","prodother"],["bl_from","Blanket period from","date","fta"],["bl_to","Blanket period to","date","fta"],["cert_date","Certification date","date","fta","fta"]]},
+ {s:"Certification",f:[["sig_name","Authorized signer",,1],["sig_title","Title"],["notes","Internal notes (not printed)","area"]]}];
+const EK={consumption:"Consumption entry",tib:"Temporary importation under bond (TIB)",usret:"U.S. goods returned (9801.00.10)",forret:"Foreign goods returned (9801.00.20)",repair:"U.S. goods returned after repair (9802.00.40 / 9802.00.50)"};
+
+const blankItem=()=>({part:"",desc:"",hts:"",coo:"",qty:"",uom:"EA",unit:"",kg:"",pkgs:"",df:"D",eccn:"",lic:"",lic_no:"",usml:"",sme:"",fta:"No",crit:"",pga:"",src:""});
+const blank=()=>{const o={mode:"exp",ior_same:true,cur:"USD",hazmat:"No",ekind:"consumption",prod_mode:"Same as exporter",itar_elig:false,items:[blankItem()],_example:false};FIELDS.forEach(s=>s.f.forEach(f=>{if(!(f[0] in o))o[f[0]]=""}));return o};
+
+/* ---------- examples ---------- */
+const EX={
+ exp:["U.S. export (EAR99) to Korea, KORUS claim",()=>({mode:"exp",req_name:"Dana Brooks",req_dept:"Sales",req_email:"d.brooks@example-pack.com",req_date:"2026-11-23",ship_date:"2026-11-30",
+  shp_co:"Example Packaging Corp.",shp_contact:"Export Desk",shp_addr:"800 Example Rd\nColumbus, OH 43215\nUnited States",shp_phone:"614-555-0130",shp_email:"export@example-pack.com",shp_tax:"31-1234567",state_origin:"OH",
+  con_co:"Example Foods Co., Ltd.",con_contact:"Import Team",con_addr:"12 Example-ro, Gangnam-gu\nSeoul 06000\nKorea",con_phone:"+82 2 555 0100",con_email:"import@example-foods.kr",con_tax:"123-45-67890",con_type:"Direct consumer",dest:"KR",
+  inco:"FCA",inco_place:"Columbus, OH",cur:"USD",inv_no:"EPC-2026-1123",po:"EF-2201",related:"No",tmode:"Ocean (containerized)",carrier:"Example Ocean Lines",scac:"EXOL",bol_no:"EXOL261123",port:"Savannah, GA",routed:"No",fwd_co:"Example Forwarding Inc.",fwd_ein:"58-7654321",hazmat:"No",
+  eei_filer:"Forwarding agent files for the USPPI",itn:"",sig_name:"Dana Brooks",sig_title:"Export Sales Manager",
+  cert_role:"Exporter",cert_name:"Dana Brooks",cert_title:"Export Sales Manager",cert_phone:"614-555-0130",cert_email:"d.brooks@example-pack.com",prod_mode:"Same as exporter",cert_date:"2026-11-23",
+  items:[{part:"SUP-12OZ",desc:"Printed polyethylene stand-up pouches, 12 oz",hts:"3923.21.0000",coo:"US",qty:"60000",uom:"PCS",unit:"0.10",kg:"480",pkgs:"3",df:"D",eccn:"EAR99",lic:"NLR",fta:"Yes",crit:"Change in tariff classification (Annex 4-A)"},
+         {part:"CAP-33",desc:"Plastic spout caps, 33 mm",hts:"3923.50.0000",coo:"US",qty:"60000",uom:"PCS",unit:"0.03",kg:"180",pkgs:"1",df:"D",eccn:"EAR99",lic:"NLR",fta:"Yes",crit:"Change in tariff classification (Annex 4-A)"}]})],
+ ctl:["U.S. export control (EAR + ITAR) to Canada",()=>({mode:"ctl",req_name:"Jordan Reyes",req_dept:"Engineering",req_email:"j.reyes@example-optics.com",req_date:"2026-11-23",ship_date:"2026-11-26",
+  shp_co:"Example Optics LLC",shp_contact:"Export Compliance",shp_addr:"500 Example Ave\nBuffalo, NY 14203\nUnited States",shp_phone:"716-555-0140",shp_email:"export@example-optics.com",shp_tax:"16-7654321",state_origin:"NY",
+  con_co:"Example Imaging Systems Inc.",con_contact:"Receiving",con_addr:"300 Example Pkwy\nWaterloo, ON N2L 0A1\nCanada",con_phone:"519-555-0170",con_email:"receiving@example-imaging.ca",con_tax:"987654321RM0001",con_type:"Reseller",dest:"CA",
+  inco:"DAP",inco_place:"Waterloo, ON",cur:"USD",inv_no:"EOL-2026-1123",po:"EIS-88120",related:"No",tmode:"Courier",carrier:"Example Courier",pro:"1Z EX4 2026 1123",port:"Buffalo, NY",routed:"No",hazmat:"No",
+  eei_filer:"USPPI files",ddtc:"",itar_auth:"",itar_elig:false,sig_name:"Jordan Reyes",sig_title:"Export Compliance Lead",
+  items:[{part:"BOSON-640-60HZ",desc:"Teledyne FLIR Boson 640 uncooled LWIR thermal camera core, 60 Hz (example)",hts:"",coo:"US",qty:"2",uom:"EA",unit:"4200",kg:"0.2",pkgs:"1",df:"D",eccn:"6A003.b.4.b",lic:"",fta:"No"},
+         {part:"BOSON-640-9HZ",desc:"Teledyne FLIR Boson 640 uncooled LWIR thermal camera core, 9 Hz (example)",hts:"",coo:"US",qty:"4",uom:"EA",unit:"2900",kg:"0.4",pkgs:"1",df:"D",eccn:"6A993",lic:"",fta:"No"},
+         {part:"QUARK-640-30HZ",desc:"FLIR Quark 640 LWIR thermal camera core, 30 Hz (example)",hts:"",coo:"US",qty:"1",uom:"EA",unit:"5500",kg:"0.1",pkgs:"1",df:"D",eccn:"",usml:"XII(c)",sme:"No",lic:"ITAR",fta:"No"}]})],
+ imp:["U.S. import: Canadian steel and electronics, USMCA claim",()=>({mode:"imp",ekind:"consumption",req_name:"Chris Allen",req_dept:"Purchasing",req_email:"c.allen@example-stamping.com",req_date:"2026-11-23",ship_date:"2026-11-27",
+  shp_co:"Example Steel Processing Inc.",shp_contact:"Shipping",shp_addr:"100 Example Rd\nHamilton, ON L8N 0A1\nCanada",shp_phone:"905-555-0150",shp_email:"shipping@example-steelproc.ca",shp_country:"CA",
+  con_co:"Example Stamping LLC",con_contact:"Receiving",con_addr:"2500 Example Ave\nDetroit, MI 48201\nUnited States",con_phone:"313-555-0190",con_email:"receiving@example-stamping.com",
+  ior_same:true,ior_no:"38-1234567",broker:"Example Customs Brokers",bond:"Continuous bond",
+  inco:"DAP",inco_place:"Detroit, MI",cur:"USD",inv_no:"ESP-2026-1123",po:"ES-55821",related:"No",tmode:"Truck",carrier:"Example Freight Lines",scac:"EXFL",pro:"PRO 7781 1123",bol_no:"BOL-1123-11",port:"Detroit, MI (3801)",hazmat:"No",
+  sig_name:"Pat Morgan",sig_title:"Sales Manager",cert_role:"Producer",cert_name:"Pat Morgan",cert_title:"Sales Manager",cert_phone:"905-555-0150",cert_email:"p.morgan@example-steelproc.ca",prod_mode:"Same as exporter",cert_date:"2026-11-23",
+  items:[{part:"GI-0.8x1250",desc:"Hot-dip galvanized nonalloy steel coil, 0.8 mm × 1250 mm, commercial quality",hts:"7210.49.0091",coo:"CA",qty:"21500",uom:"KG",unit:"1.15",kg:"21500",pkgs:"2",fta:"Yes",crit:"B",pga:"steel",src:"Supplier invoice ESP-2026-1123"},
+         {part:"LDR-SENSOR",desc:"Laser distance sensor, Class 2 laser (example)",hts:"",coo:"CA",qty:"4",uom:"EA",unit:"380",kg:"2",pkgs:"1",fta:"No",crit:"",pga:"radiation",src:"Supplier invoice ESP-2026-1123"}]})],
+ rep:["U.S. import: U.S. goods returned after repair in Mexico",()=>({mode:"imp",ekind:"repair",req_name:"Sam Lee",req_dept:"Maintenance (MRO)",req_email:"s.lee@example-stamping.com",req_date:"2026-11-23",ship_date:"2026-11-28",
+  shp_co:"Example Hidráulica S.A. de C.V.",shp_contact:"Servicio",shp_addr:"Av. Ejemplo 120\nMonterrey, NL 64000\nMexico",shp_phone:"+52 81 5555 0100",shp_country:"MX",
+  con_co:"Example Stamping LLC",con_contact:"Maintenance",con_addr:"2500 Example Ave\nDetroit, MI 48201\nUnited States",con_phone:"313-555-0190",
+  ior_same:true,ior_no:"38-1234567",broker:"Example Customs Brokers",bond:"Continuous bond",
+  inco:"DAP",inco_place:"Detroit, MI",cur:"USD",inv_no:"REP-2026-0412",po:"MRO-60117",related:"No",tmode:"Truck",carrier:"Example Freight Lines",port:"Laredo, TX (2304)",hazmat:"No",
+  exp_date:"2026-10-20",exp_ref:"Export invoice MRO-60117, BOL-1020-03",rep_co:"Example Hidráulica S.A. de C.V.",rep_addr:"Av. Ejemplo 120\nMonterrey, NL 64000\nMexico",warranty:"No",rep_desc:"Replaced seals and bearings, re-machined pump housing, pressure-tested",rep_cost:"1850",rep_after:"6200",
+  sig_name:"Sam Lee",sig_title:"Maintenance Supervisor",
+  items:[{part:"HYD-PMP-220",desc:"Hydraulic gear pump, U.S.-made, returned after repair",hts:"",coo:"US",qty:"1",uom:"EA",unit:"4350",kg:"38",pkgs:"1",fta:"No",src:"Original purchase invoice"}]})],
+ tib:["U.S. import: TIB for testing",()=>({mode:"imp",ekind:"tib",tib_sub:"9813.00.30",est_duty:"1240",tib_use:"Endurance testing of prototype gearboxes at the importer's test lab in Detroit, MI. The articles will not be sold, used in production or put to any other use, and will be exported to Germany after testing.",
+  req_name:"Chris Allen",req_dept:"R&D",req_date:"2026-11-23",ship_date:"2026-12-02",
+  shp_co:"Example Antriebe GmbH",shp_addr:"Beispielstraße 5\n70173 Stuttgart\nGermany",shp_country:"DE",
+  con_co:"Example Stamping LLC",con_addr:"2500 Example Ave\nDetroit, MI 48201\nUnited States",ior_same:true,ior_no:"38-1234567",broker:"Example Customs Brokers",bond:"Single transaction bond",
+  inco:"DAP",inco_place:"Detroit, MI",cur:"USD",inv_no:"PRO-2026-77",related:"No",tmode:"Air",carrier:"Example Air Cargo",pro:"AWB 123-45678901",port:"Detroit, MI (3807)",hazmat:"No",sig_name:"Chris Allen",sig_title:"Test Engineer",
+  items:[{part:"GBX-PROTO-3",desc:"Prototype industrial gearbox for testing, not for sale",hts:"",coo:"DE",qty:"2",uom:"EA",unit:"9800",kg:"140",pkgs:"2",fta:"No",src:"Pro forma invoice PRO-2026-77"}]})]};
+
+/* ---------- state ---------- */
+let S;try{const r=localStorage.getItem(KEY);S=r?JSON.parse(r):null}catch(e){}
+if(!S){S=Object.assign(blank(),EX.exp[1]());S._example=true}
+S=Object.assign(blank(),S);if(!Array.isArray(S.items)||!S.items.length)S.items=[blankItem()];
+S.items=S.items.map(i=>Object.assign(blankItem(),i));
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+
+const isExp=()=>S.mode!=="imp";
+const partner=()=>isExp()?S.dest:S.shp_country;
+const ftaOn=()=>!!FTA[partner()]&&S.items.some(i=>i.fta==="Yes");
+const usesITAR=()=>S.mode==="ctl"&&S.items.some(i=>(i.usml||"").trim());
+function cond(c){
+  if(c===1||c===undefined)return true;
+  if(Array.isArray(c))return c.includes(S.mode);
+  if(c==="ior")return S.mode==="imp"&&!S.ior_same;
+  if(c==="eex")return isExp()&&/^Not required/.test(S.eei_filer);
+  if(c==="itn")return isExp()&&!/^Not required/.test(S.eei_filer);
+  if(c==="itarreq")return usesITAR();
+  if(c==="tib")return S.mode==="imp"&&S.ekind==="tib";
+  if(c==="ret")return S.mode==="imp"&&["usret","forret","repair"].includes(S.ekind);
+  if(c==="forret"||c==="repair")return S.mode==="imp"&&S.ekind===c;
+  if(c==="fta")return ftaOn();
+  if(c==="prodother")return ftaOn()&&S.prod_mode==="Other producer";
+  return true;
+}
+const lab=l=>typeof l==="object"?(l[S.mode]||l.all):l;
+
+/* ---------- render form ---------- */
+function renderForm(){
+  const h=FIELDS.map((sec,si)=>{
+    const show=(!sec.m||sec.m.includes(S.mode))&&(!sec.cond||cond(sec.cond));
+    const fields=sec.f.map(norm).map(([k,l,t,showIf,req])=>{
+      const vis=cond(showIf===1?undefined:showIf);
+      const reqd=req&&cond(req===1?undefined:req);
+      const id="f_"+k;let inp;
+      if(t==="area")inp=`<textarea id="${id}" data-k="${k}" rows="2"></textarea>`;
+      else if(t==="check")return `<label class="check wide" data-wrap="${k}" ${vis?"":"hidden"}><input type="checkbox" id="${id}" data-k="${k}">${esc(lab(l))}</label>`;
+      else if(t==="country")inp=`<select id="${id}" data-k="${k}"><option value="">Select</option>${Object.entries(COUNTRIES).map(([c,n])=>`<option value="${c}">${esc(n)}${FTA[c]?" · FTA":""}</option>`).join("")}</select>`;
+      else if(t&&t.startsWith("sel:")){const opts=t.slice(4).split("|");inp=`<select id="${id}" data-k="${k}">${opts.map(o=>`<option value="${esc(o)}">${esc(k==="ekind"?EK[o]:k==="tib_sub"&&o?o+" — "+TIB[o][0]:o||"Select")}</option>`).join("")}</select>`}
+      else inp=`<input id="${id}" data-k="${k}" ${t==="number"?'type="number" min="0" step="any"':t==="date"?'type="date"':""} class="${t==="mono"?"mono":""}">`;
+      return `<label class="f${t==="area"?" wide":""}" data-wrap="${k}" ${vis?"":"hidden"}><span class="${reqd?"req":""}">${esc(lab(l))}</span>${inp}</label>`;
+    }).join("");
+    return `<section class="panel" data-sec="${si}" ${show?"":"hidden"}><h2>${esc(lab(sec.s))}${sec.t?` <small>${esc(lab(sec.t))}</small>`:""}</h2><div class="fields">${fields}</div></section>`;
+  }).join("");
+  $("form").innerHTML=h;
+  document.querySelectorAll("#form [data-k]").forEach(el=>{
+    const k=el.dataset.k;el.type==="checkbox"?el.checked=!!S[k]:el.value=S[k]??"";
+    el.addEventListener(el.type==="checkbox"||el.tagName==="SELECT"?"change":"input",()=>{
+      S[k]=el.type==="checkbox"?el.checked:el.value;S._example=false;save();
+      if(["ior_same","eei_filer","ekind","dest","shp_country","prod_mode"].includes(k))renderForm();
+      refresh();
+    });
+  });
+}
+
+/* ---------- items ---------- */
+function itemCols(){
+  const m=S.mode;
+  const c=[["part","Part no.","text","mono",100],["desc","Description","text","",220],
+    ["hts",isExp()?"Schedule B / HTS":"HTSUS (10-digit)","text","mono",120],["coo","Origin","text","mono",56],
+    ["qty","Qty","number","",64],["uom","UOM","sel:EA,PCS,KG,LB,M,SET,PR,DOZ,L","",70],["unit","Unit value","number","",90],["_tot"],["kg","Net kg","number","",70],["pkgs","Pkgs","number","",56]];
+  if(isExp())c.push(["df","D/F","sel:D,F","",56],["eccn","ECCN","text","mono",100],["lic","License / exception","sel:,NLR,LVS,GBS,TMP,RPL,STA,ENC,TSU,BAG,AVS,License required"+(m==="ctl"?",ITAR":""),"",120],["lic_no","License no.","text","mono",110]);
+  if(m==="ctl")c.push(["usml","USML category","text","mono",90],["sme","SME?","sel:,No,Yes","",62]);
+  if(m==="imp")c.push(["pga","Other agency (PGA)","sel:,"+Object.keys(PGA).join(","),"",150],["src","Value source","text","",130]);
+  c.push(["fta","FTA claim","sel:No,Yes","",70],["crit",isExp()?"Origin rule / criterion":"Origin criterion","text","",120]);
+  return c;
+}
+function renderItems(){
+  const cols=itemCols();
+  $("items-head").innerHTML=`<tr><th>#</th>${cols.map(c=>`<th>${c[0]==="_tot"?"Line total":esc(c[1])}</th>`).join("")}<th></th></tr>`;
+  $("items").innerHTML=S.items.map((it,i)=>`<tr><td class="num">${i+1}</td>${cols.map(([k,l,t,cls,w])=>{
+    if(k==="_tot")return `<td class="num" data-tot="${i}"></td>`;
+    const id=`it-${i}-${k}`;
+    if(t.startsWith("sel:"))return `<td><select id="${id}" data-i="${i}" data-f="${k}" aria-label="${esc(l)} line ${i+1}" style="min-width:${w}px">${t.slice(4).split(",").map(o=>`<option value="${esc(o)}"${(it[k]??"")===o?" selected":""}>${k==="pga"?(o?esc(PGA[o].a+" · "+PGA[o].l):"None / not sure"):esc(o||"—")}</option>`).join("")}</select></td>`;
+    return `<td><input id="${id}" data-i="${i}" data-f="${k}" ${t==="number"?'type="number" min="0" step="any"':""} class="${cls}" style="min-width:${w}px" aria-label="${esc(l)} line ${i+1}" value="${esc(it[k])}"></td>`;
+  }).join("")}<td><button type="button" class="rowdel" data-del="${i}" aria-label="Remove line ${i+1}">✕</button></td></tr>`).join("");
+  $("goods-hint").textContent=isExp()?"Schedule B or HTS number, ECCN or EAR99, and the license code for each line":"HTSUS number, origin, and any other agency that regulates the product";
+}
+$("items").addEventListener("input",e=>{const t=e.target;if(t.dataset.f==null||t.tagName==="SELECT")return;S.items[+t.dataset.i][t.dataset.f]=t.value;S._example=false;save();refresh()});
+$("items").addEventListener("change",e=>{const t=e.target;if(t.tagName!=="SELECT")return;S.items[+t.dataset.i][t.dataset.f]=t.value;save();if(t.dataset.f==="fta")renderForm();refresh()});
+$("items").addEventListener("click",e=>{const d=e.target.closest("[data-del]");if(!d)return;S.items.splice(+d.dataset.del,1);if(!S.items.length)S.items.push(blankItem());save();renderItems();refresh()});
+$("add-row").addEventListener("click",()=>{S.items.push(blankItem());save();renderItems();refresh()});
+
+function totals(){let val=0,kg=0,pk=0,qty=0;S.items.forEach(it=>{val+=num(it.qty)*num(it.unit);kg+=num(it.kg);pk+=num(it.pkgs);qty+=num(it.qty)});const chg=num(S.freight)+num(S.insur)+num(S.other_chg);return {val,kg,pk,qty,chg,inv:val+chg}}
+
+/* ---------- EEI determination ---------- */
+function eeiStatus(){
+  if(!isExp())return null;
+  const why=[];
+  if(S.items.some(i=>(i.usml||"").trim()||i.lic==="ITAR"))why.push("ITAR items always need EEI (22 CFR 123.22)");
+  if(S.items.some(i=>i.lic==="License required"))why.push("a BIS license is required");
+  const bySB={};S.items.forEach(i=>{const k=digits(i.hts).slice(0,10)||"(no number)";bySB[k]=(bySB[k]||0)+num(i.qty)*num(i.unit)});
+  const over=Object.entries(bySB).filter(([,v])=>v>2500);
+  if(S.dest!=="CA"&&over.length)why.push(`Schedule B ${over.map(([k])=>k).join(", ")} over US$2,500`);
+  if(why.length)return {req:true,why};
+  if(S.dest==="CA")return {req:false,cite:"NOEEI 15 CFR 30.36"};
+  return {req:false,cite:"NOEEI 15 CFR 30.37(a)"};
+}
+const dcsNeeded=()=>isExp()&&S.items.some(i=>{const e=(i.eccn||"").trim();return e&&!/^EAR99$/i.test(e)});
+
+/* ---------- checks ---------- */
+function checks(){
+  const out=[],Er=m=>out.push(["err",m]),W=m=>out.push(["warn",m]);
+  const miss=[];
+  FIELDS.forEach(sec=>{if(sec.m&&!sec.m.includes(S.mode))return;if(sec.cond&&!cond(sec.cond))return;
+    sec.f.map(norm).forEach(([k,l,t,showIf,req])=>{if(req&&cond(showIf===1?undefined:showIf)&&cond(req===1?undefined:req)&&!String(S[k]??"").trim())miss.push(lab(l))})});
+  if(miss.length)Er("Missing: "+miss.join(", ")+".");
+  const p=partner();
+  S.items.forEach((it,i)=>{const n=i+1,m=[];
+    if(!it.desc.trim())m.push("description");if(!digits(it.hts))m.push(isExp()?"Schedule B / HTS number":"HTS number");if(!it.coo.trim())m.push("origin");if(!num(it.qty))m.push("quantity");if(!num(it.unit))m.push("unit value");
+    if(m.length)Er(`Line ${n}: missing ${m.join(", ")}.`);
+    if(digits(it.hts)&&digits(it.hts).length<10)W(`Line ${n}: use the full 10-digit ${isExp()?"Schedule B or HTS":"HTSUS"} number.`);
+    if(it.coo.trim()&&!/^[A-Za-z]{2}$/.test(it.coo.trim()))W(`Line ${n}: use the 2-letter ISO code for origin (US, CA, DE…).`);
+    if(isExp()){
+      const e=(it.eccn||"").trim(),u=(it.usml||"").trim();
+      if(e&&u)Er(`Line ${n}: has both an ECCN and a USML category. An item is subject to the EAR or the ITAR, not both.`);
+      if(!e&&!u)Er(`Line ${n}: enter the ECCN or EAR99${S.mode==="ctl"?", or the USML category":""}.`);
+      if(e&&!/^EAR99$/i.test(e)&&!it.lic)Er(`Line ${n}: ECCN ${e} is on the Commerce Control List. Enter NLR, the license exception, or License required after checking the Commerce Country Chart for ${cname(S.dest)||"the destination"}.`);
+      if(e&&!/^EAR99$/i.test(e)&&it.lic==="NLR")W(`Line ${n}: NLR for ${e} is only correct if the Commerce Country Chart shows no license requirement for ${cname(S.dest)||"the destination"} and no end-use or end-user rule applies.`);
+      if(it.lic==="License required"&&!it.lic_no.trim())Er(`Line ${n}: enter the BIS license number.`);
+      if(it.lic&&!["NLR","License required","ITAR",""].includes(it.lic))W(`Line ${n}: license exception ${it.lic}. Confirm every condition in 15 CFR Part 740 and keep the record.`);
+      if(u&&S.mode==="exp")Er(`Line ${n}: USML item. Switch to “U.S. export control” mode for ITAR shipments.`);
+      if(u&&S.mode==="ctl"&&it.sme==="")W(`Line ${n}: mark whether the USML item is significant military equipment (SME).`);
+    } else {
+      const k=pgaHint(it.hts);
+      if(!it.pga&&k)W(`Line ${n}: HTS ${it.hts} is often regulated by ${PGA[k].a} (${PGA[k].l.toLowerCase()}). Choose it under “Other agency” if it applies, or confirm with your broker.`);
+      if(it.pga==="steel")W(`Line ${n}: steel mill product. Get the SIMA license before the entry summary and keep the mill test certificate for the country of melt and pour.`);
+      if(it.pga&&it.pga!=="steel")W(`Line ${n}: ${PGA[it.pga].a} — see the agency checklist for the documents needed.`);
+      if(num(it.unit)&&!it.src.trim())W(`Line ${n}: note where the value comes from (seller's invoice, price list) and keep it on file.`);
+    }
+    if(it.fta==="Yes"){
+      if(!FTA[p])Er(`Line ${n}: FTA claim, but ${cname(p)||"the "+(isExp()?"destination":"country of export")} has no free trade agreement with the United States.`);
+      if(!it.crit.trim())Er(`Line ${n}: FTA claim. Enter the origin rule or criterion the good meets.`);
+      if(!isExp()&&it.coo.trim()&&FTA[p]&&!(FTA[p][2]==="S"?/^(US|CA|MX)$/i:new RegExp("^(US|"+p+")$","i")).test(it.coo.trim()))W(`Line ${n}: FTA claim but origin is ${it.coo.toUpperCase()}. Confirm the good qualifies under the rule of origin.`);
+    }
+  });
+  if(isExp()){
+    const st=eeiStatus();
+    if(st.req&&/^Not required/.test(S.eei_filer))Er("EEI is required: "+st.why.join("; ")+".");
+    if(st.req&&!/^Not required/.test(S.eei_filer)&&!S.itn.trim())W("EEI required ("+st.why.join("; ")+"). Get the ITN before the goods leave and show it on the bill of lading or air waybill.");
+    if(!st.req&&!S.eei_filer)W(`EEI may not be required (${st.cite}). Choose “Not required (exemption)” and the citation, or file anyway.`);
+    if(S.routed==="Yes")W("Routed export: the foreign principal party authorizes the forwarder to file. The USPPI still provides the classification, license and value data.");
+    if(dcsNeeded())W("Items on the Commerce Control List: the commercial invoice will carry the destination control statement (15 CFR 758.6).");
+    W("Screen the consignee, intermediate consignee and end user against the Consolidated Screening List before export.");
+    if(S.mode==="ctl"&&usesITAR()){
+      if(!S.itar_elig)W("ITAR: confirm the eligible party certification for the EEI (15 CFR 30.6(b)(16)).");
+      W("ITAR: the invoice will carry the 22 CFR 123.9(b) statement with the destination, end user and license or exemption.");
+    }
+    if(S.dest==="IL"&&ftaOn())W("Israel: the invoice declaration must be signed by an employee of the exporter or producer who is in the United States. Electronic signatures are not accepted.");
+  } else {
+    if(S.ekind==="tib"){const t=TIB[S.tib_sub];if(t)W(`TIB bond: ${t[1]===2?"double":"110% of"} the estimated duties and fees. Export within 1 year of import; extensions (CBP Form 3173) up to 3 years in total.`)}
+    if(S.ekind==="usret"){const v=totals().val;if(v>2500)W("U.S. goods returned over US$2,500: the foreign shipper's and the importer's declarations (19 CFR 10.1(a)) are required.");else W("U.S. goods returned of US$2,500 or less: declarations not required unless CBP asks; US$250 or less may use CBP Form 3311.")}
+    if(S.ekind==="repair"&&["CA","MX"].includes(S.shp_country))W("Repaired in Canada or Mexico: under USMCA Article 2.6 the goods re-enter duty-free whether or not the repair was under warranty. Ask your broker which declarations CBP wants for USMCA repairs.");
+    if(S.ekind==="forret")W("9801.00.20 covers goods previously imported with duty paid, exported under a lease or similar use agreement, and reimported by the same person. Confirm the goods meet every condition.");
+  }
+  return out;
+}
+
+/* ---------- documents ---------- */
+const box=(l,v)=>`<div><span class="lbl">${l}</span><div class="val">${esc(v)||"&nbsp;"}</div></div>`;
+const party=(co,addr,ct,ph,em,tax,taxl)=>pl(co,addr,ct&&("Attn: "+ct),ph&&("Tel: "+ph),em,tax&&((taxl||"Tax ID")+": "+tax));
+const shipper=()=>party(S.shp_co,S.shp_addr,S.shp_contact,S.shp_phone,S.shp_email,S.shp_tax,isExp()?"EIN":"Tax ID");
+const consignee=()=>party(S.con_co,S.con_addr,S.con_contact,S.con_phone,S.con_email,S.con_tax);
+const ior=()=>S.ior_same?pl(S.con_co,S.con_addr,S.ior_no&&("IOR no.: "+S.ior_no)):pl(S.ior_co,S.ior_addr,S.ior_no&&("IOR no.: "+S.ior_no));
+const head=(title,sub,meta)=>`<div class="dochead"><div><h3>${title}</h3>${sub?`<div class="lbl" style="margin-top:4px">${sub}</div>`:""}</div><dl class="meta">${meta.map(([a,b])=>`<dt>${a}</dt><dd>${esc(b)||"—"}</dd>`).join("")}</dl></div>`;
+const sig=(a,b,c)=>`<div class="sig"><div><span>${esc(a)}</span>Name and signature</div><div><span>${esc(b)}</span>Title</div><div><span>${esc(c)}</span>Date</div></div>`;
+const ctl=it=>[it.eccn&&("ECCN "+it.eccn),it.usml&&("USML "+it.usml),it.lic&&it.lic!=="ITAR"&&it.lic,it.lic_no].filter(Boolean).map(esc).join("<br>");
+const DCS="These items are controlled by the U.S. Government and authorized for export only to the country of ultimate destination for use by the ultimate consignee or end-user(s) herein identified. They may not be resold, transferred, or otherwise disposed of, to any other country or to any person other than the authorized ultimate consignee or end-user(s), either in their original form or after being incorporated into other items, without first obtaining approval from the U.S. government or as otherwise authorized by U.S. law and regulations.";
+
+function docCI(){
+  const t=totals(),c=S.cur,ex=isExp(),flags=[];
+  if(S.related==="Yes")flags.push("Related parties");
+  if(ex&&dcsNeeded())flags.push("EAR controlled");
+  if(usesITAR())flags.push("ITAR controlled");
+  if(ftaOn())flags.push((FTA[partner()][1])+" claimed");
+  if(!ex&&S.ekind!=="consumption")flags.push(EK[S.ekind]);
+  const rows=S.items.map((it,i)=>`<tr><td class="r">${i+1}</td><td class="m">${esc(it.part)}</td><td>${esc(it.desc)}</td><td class="m">${esc(it.hts)}</td><td class="m">${esc((it.coo||"").toUpperCase())}</td>${ex?`<td class="m">${ctl(it)}</td>`:""}<td class="c">${it.fta==="Yes"?esc(ex?"Yes":FTA[partner()]?.[2]||"Yes"):""}</td><td class="r">${fmt(num(it.qty),0)} ${esc(it.uom)}</td><td class="r">${fmt(num(it.kg),1)}</td><td class="r">${fmt(num(it.unit))}</td><td class="r">${fmt(num(it.qty)*num(it.unit))}</td></tr>`).join("");
+  const st=ex?eeiStatus():null;
+  const stm=[];
+  if(!ex&&S.ekind==="tib")stm.push(`<p><b>Temporary importation under bond, HTSUS ${esc(S.tib_sub)}.</b> The articles will be used solely for: ${esc(S.tib_use)} They will not be put to any other use and will be exported within the bond period.</p>`);
+  if(!ex&&S.ekind==="usret")stm.push(`<p><b>U.S. goods returned, HTSUS 9801.00.10.</b> Products of the United States returned without having been advanced in value or improved in condition while abroad.${S.exp_ref?" Exported under "+esc(S.exp_ref):""}${S.exp_date?" on "+esc(S.exp_date):""}.</p>`);
+  if(!ex&&S.ekind==="forret")stm.push(`<p><b>Foreign goods returned, HTSUS 9801.00.20.</b> Previously imported under entry ${esc(S.prior_entry)||"________"}, duty paid, and returned without advancement in value or improvement in condition.</p>`);
+  if(!ex&&S.ekind==="repair")stm.push(`<p><b>Returned after repair abroad, HTSUS ${S.warranty==="Yes"?"9802.00.40 (warranty repair)":"9802.00.50"}.</b> Cost of repairs: ${money(num(S.rep_cost),c)}. ${S.warranty==="Yes"?"":"Duty applies to the value of the repairs only."}</p>`);
+  if(ftaOn())stm.push(`<p><b>${esc(FTA[partner()][1])}.</b> Preferential treatment is claimed for the lines marked under FTA. ${partner()==="IL"&&ex?"See the invoice declaration.":"A certification of origin is provided separately."}</p>`);
+  stm.push(`<p>I declare that the information on this invoice is true and correct, and that the contents and value of this shipment are as stated above.</p>`);
+  if(usesITAR())stm.push(`<p><b>ITAR (22 CFR 123.9(b)).</b> Country of ultimate destination: ${esc(cname(S.dest))}. End user: ${esc(S.con_co.replace(/\.$/,""))}. License or exemption: ${esc(S.itar_auth)||"________"}. These items are controlled by the U.S. government and authorized for export only to the country of ultimate destination for use by the end-user herein identified. They may not be resold, transferred, or otherwise be disposed of, to any other country or to any person other than the authorized end-user or consignee(s), either in their original form or after being incorporated into other end-items, without first obtaining approval from the U.S. Department of State or use of an applicable exemption.</p>`);
+  if(ex&&dcsNeeded())stm.push(`<p style="margin:0">${DCS}</p>`);
+  return `${head("Commercial Invoice",ex?"U.S. export":"U.S. import",[["Invoice no.",S.inv_no],["Date",S.ship_date||S.req_date],["PO / ref.",S.po],["Currency",c]])}
+   <div style="margin:-4px 0 8px">${flags.map(f=>`<span class="flag">${esc(f)}</span>`).join("")}</div>
+   <div class="boxes">
+     ${box(ex?"Seller / USPPI / exporter":"Seller / foreign shipper",shipper())}
+     ${box(ex?"Ultimate consignee":"Buyer / ship to",consignee())}
+     ${ex?box("Intermediate consignee",pl(S.int_co,S.int_addr)):box("Importer of record",ior())}
+     ${ex?box("Forwarding agent",pl(S.fwd_co,S.fwd_ein&&("EIN: "+S.fwd_ein))):box("Customs broker",S.broker)}
+   </div>
+   <div class="boxes four">
+     ${box("Terms of sale (Incoterms® 2020)",[S.inco,S.inco_place].filter(Boolean).join(" "))}
+     ${box(ex?"Country of ultimate destination":"Country of export",cname(ex?S.dest:S.shp_country))}
+     ${box("Related parties",S.related)}
+     ${box(ex?"Port of export":"Port of entry",S.port)}
+     ${box("Method / carrier",[S.tmode,S.carrier].filter(Boolean).join(" · "))}
+     ${box("Tracking / BOL",[S.pro,S.bol_no].filter(Boolean).join(" · "))}
+     ${box(ex?"EEI / ITN":"Entry type",ex?(st.req?(S.itn||"ITN pending"):(S.eei_ex||st.cite).split(" — ")[0]):EK[S.ekind])}
+     ${box("Packages / net wt",`${t.pk} pkg · ${fmt(t.kg,1)} kg (${fmt(t.kg*KG_LB,1)} lb)`)}
+   </div>
+   <table class="doc"><thead><tr><th class="r">#</th><th>Part no.</th><th>Full description of goods</th><th>${ex?"Schedule B / HTS":"HTSUS"}</th><th>Origin</th>${ex?"<th>Export control</th>":""}<th class="c">FTA</th><th class="r">Qty</th><th class="r">Net kg</th><th class="r">Unit value</th><th class="r">Total (${esc(c)})</th></tr></thead>
+   <tbody>${rows}</tbody><tfoot><tr><td colspan="${ex?7:6}">Totals</td><td class="r">${fmt(t.qty,0)}</td><td class="r">${fmt(t.kg,1)}</td><td></td><td class="r">${fmt(t.val)}</td></tr></tfoot></table>
+   <div class="sumgrid"><div class="decl">${stm.join("")}</div>
+     <div class="sumtbl"><div><span>Goods value</span><span>${fmt(t.val)}</span></div><div><span>Freight</span><span>${fmt(num(S.freight))}</span></div><div><span>Insurance</span><span>${fmt(num(S.insur))}</span></div><div><span>Other charges</span><span>${fmt(num(S.other_chg))}</span></div><div><span>Invoice total</span><span>${money(t.inv,c)}</span></div></div></div>
+   ${sig(S.sig_name,S.sig_title,S.ship_date||S.req_date)}
+   <p class="foot">Country of origin is where the goods were produced, not where they were shipped from. Charges are shown separately from the goods value.</p>`;
+}
+
+function docSLI(){
+  const st=eeiStatus(),ctlm=S.mode==="ctl";
+  const rows=S.items.map((it,i)=>`<tr><td class="r">${i+1}</td><td class="c">${esc(it.df)}</td><td class="m">${esc(it.hts)}</td><td>${esc(it.desc)}</td><td class="r">${fmt(num(it.qty),0)} ${esc(it.uom)}</td><td class="r">${fmt(num(it.kg),1)}</td><td class="r">${fmt(num(it.qty)*num(it.unit))}</td><td class="m">${esc(it.eccn||"")}${it.usml?"USML "+esc(it.usml):""}</td><td class="m">${esc(it.lic==="License required"?"License":it.lic)}${it.lic_no?"<br>"+esc(it.lic_no):""}</td></tr>`).join("");
+  return `${head("Shipper's Letter of Instruction","Instructions from the USPPI to the forwarding agent · EEI data, 15 CFR 30.6",[["Invoice no.",S.inv_no],["Date of export",S.ship_date],["Reference",S.po]])}
+   <div class="boxes">
+     ${box("1. USPPI (name, address, EIN)",shipper())}
+     ${box("2. Forwarding / authorized agent",pl(S.fwd_co,S.fwd_ein&&("EIN: "+S.fwd_ein)))}
+     ${box("3. Ultimate consignee",pl(consignee(),S.con_type&&("Type: "+S.con_type)))}
+     ${box("4. Intermediate consignee",pl(S.int_co,S.int_addr))}
+   </div>
+   <div class="boxes four">
+     ${box("5. U.S. state of origin",S.state_origin)}
+     ${box("6. Country of ultimate destination",cname(S.dest))}
+     ${box("7. Method of transportation",S.tmode)}
+     ${box("8. Carrier / carrier ID",[S.carrier,S.scac].filter(Boolean).join(" · "))}
+     ${box("9. Port of export",S.port)}
+     ${box("10. Related parties",S.related)}
+     ${box("11. Routed export transaction",S.routed)}
+     ${box("12. Hazardous materials",S.hazmat)}
+     ${box("13. In-bond code","70 · Not in-bond")}
+     ${box("14. Terms of sale",[S.inco,S.inco_place].filter(Boolean).join(" "))}
+     ${box("15. EEI filing",st.req?(S.eei_filer||"Required"):(S.eei_filer||"Not required"))}
+     ${box("16. ITN or exemption",st.req?(S.itn||"ITN to follow"):(S.eei_ex||st.cite).split(" — ")[0])}
+   </div>
+   <table class="doc"><thead><tr><th class="r">#</th><th class="c">D/F</th><th>Schedule B / HTS</th><th>Commodity description</th><th class="r">Qty / UOM</th><th class="r">Ship. wt kg</th><th class="r">Value (USD)</th><th>ECCN / USML</th><th>License code</th></tr></thead><tbody>${rows}</tbody></table>
+   ${ctlm&&usesITAR()?`<div class="sec">Department of State (ITAR) data for the EEI</div>
+   <div class="boxes four">${box("DDTC registration",S.ddtc)}${box("License / exemption",S.itar_auth)}${box("Eligible party certification",S.itar_elig?"Yes":"No")}${box("SME on this shipment",S.items.some(i=>i.sme==="Yes")?"Yes":"No")}</div>
+   <table class="doc"><thead><tr><th class="r">Line</th><th>USML category</th><th class="c">SME</th><th class="r">Qty / UOM</th><th class="r">Value (USD)</th></tr></thead><tbody>${S.items.map((it,i)=>it.usml?`<tr><td class="r">${i+1}</td><td class="m">${esc(it.usml)}</td><td class="c">${esc(it.sme)}</td><td class="r">${fmt(num(it.qty),0)} ${esc(it.uom)}</td><td class="r">${fmt(num(it.qty)*num(it.unit))}</td></tr>`:"").join("")}</tbody></table>${S.itar_note?`<p class="note">${esc(S.itar_note)}</p>`:""}`:""}
+   <div class="decl">
+     <p><b>Authorization.</b> The USPPI authorizes the forwarding agent named above to act as its agent for export control and customs purposes, and to prepare and file the Electronic Export Information for this shipment in AES (15 CFR 30.3). The USPPI certifies that the data above is true, complete and correct, and that it will keep supporting records for five years.</p>
+     <p style="margin:0"><b>Instructions.</b> Show the ${st.req?"ITN":"exemption citation"} on the bill of lading or air waybill. ${dcsNeeded()?"The commercial invoice carries the EAR destination control statement. ":""}${usesITAR()?"ITAR items: file the State Department data above and do not ship before the license or exemption is confirmed. ":""}Return copies of the transport document and EEI confirmation to the USPPI.</p>
+   </div>
+   ${sig(S.sig_name,S.sig_title,S.req_date)}
+   <p class="foot">There is no government form for the SLI; this layout follows the EEI data elements in 15 CFR 30.6.</p>`;
+}
+
+function docFTA(){
+  const p=partner(),f=FTA[p];const lines=S.items.filter(i=>i.fta==="Yes");
+  const exp_=isExp()?{co:S.shp_co,addr:S.shp_addr,ph:S.shp_phone,em:S.shp_email}:{co:S.shp_co,addr:S.shp_addr,ph:S.shp_phone,em:S.shp_email};
+  const imp_=isExp()?{co:S.con_co,addr:S.con_addr,ph:S.con_phone,em:S.con_email}:(S.ior_same?{co:S.con_co,addr:S.con_addr,ph:S.con_phone,em:S.con_email}:{co:S.ior_co,addr:S.ior_addr});
+  const pty=x=>pl(x.co,x.addr,x.ph&&("Tel: "+x.ph),x.em&&("Email: "+x.em));
+  const dflt=S.cert_role==="Importer"?imp_:exp_;
+  const cert=pl(S.cert_name&&(S.cert_name+(S.cert_title?", "+S.cert_title:"")),S.cert_co||dflt.co,S.cert_addr||dflt.addr,S.cert_phone&&("Tel: "+S.cert_phone),S.cert_email&&("Email: "+S.cert_email));
+  const prod=S.prod_mode==="Other producer"?pl(S.prod_co,S.prod_addr):S.prod_mode==="Same as exporter"?pty(exp_):S.prod_mode;
+  const h6=h=>{const d=digits(h);return d.length>=6?d.slice(0,4)+"."+d.slice(4,6):h};
+  const period=S.bl_from&&S.bl_to?`${S.bl_from} to ${S.bl_to}`:`Single shipment${S.inv_no?", invoice "+S.inv_no:""}`;
+  if(p==="IL"&&isExp()){
+    return `${head("Invoice Declaration","United States–Israel Free Trade Area Agreement",[["Invoice no.",S.inv_no],["Date",S.cert_date],["Place",S.shp_addr.split("\n").slice(-2,-1)[0]||""]])}
+     <table class="doc"><thead><tr><th class="r">#</th><th>Description of goods</th><th>HS</th><th>Origin rule</th></tr></thead><tbody>${lines.map((it,k)=>`<tr><td class="r">${k+1}</td><td>${esc(it.desc)}</td><td class="m">${esc(h6(it.hts))}</td><td>${esc(it.crit)}</td></tr>`).join("")}</tbody></table>
+     <div class="decl"><p>I, the undersigned, hereby declare that unless otherwise indicated, the goods covered by this document fully comply with the rules of origin and the other provisions of the Agreement on the Establishment of a Free Trade Area between the Government of Israel and the Government of the United States of America.</p>
+     <p style="margin:0"><span class="tick ${S.cert_role==="Exporter"?"on":""}"></span>The Exporter (whether the exporter is the producer or not) &nbsp; <span class="tick ${S.cert_role==="Producer"?"on":""}"></span>The Producer (is not the exporter)</p></div>
+     <div class="boxes">${box("Tax identification",S.shp_tax)}${box("Name",S.cert_name)}${box("Title",S.cert_title)}${box("Email",S.cert_email)}</div>
+     ${sig(S.cert_name,S.cert_title,S.cert_date)}
+     <p class="foot">Print the declaration on the invoice, packing list or pro forma, or on letterhead titled “INVOICE DECLARATION” with the invoice number, date and place of issue. Sign by hand: an employee of the exporter or producer who is in the United States. Electronic signatures are not accepted. Lines without an FTA claim are not covered. Source: trade.gov, U.S. Origin Invoice Declaration.</p>`;
+  }
+  const usmca=f[2]==="S";
+  const statement=usmca?"I certify that the goods described in this document qualify as originating and the information contained in this document is true and accurate. I assume responsibility for proving such representations and agree to maintain and present upon request or to make available during a verification visit, documentation necessary to support this certification."
+   :`I certify that the goods described in this document are originating goods under the ${f[1]} and comply with all requirements for preferential tariff treatment under that Agreement; that the information in this document is true and accurate; and that I will maintain, and present upon request, the documentation necessary to support this certification. This certification consists of ___ pages, including all attachments.`;
+  const note=usmca?"USMCA Article 5.2 and Annex 5-A: no prescribed form; these are the minimum data elements. Keep supporting records for at least five years."
+   :p==="KR"?"KORUS (19 CFR 10.1004): no prescribed format; English or Korean; signed and dated; blanket period up to 12 months; valid four years from issue."
+   :f[1]==="CAFTA-DR"?"CAFTA-DR (19 CFR 10.584): no prescribed format; English or the exporting country's language; blanket period up to 12 months; valid four years from signature."
+   :p==="MA"?"Morocco (19 CFR 10.764): no official form; the importer provides the declaration to CBP on request."
+   :"No prescribed form is listed here for this agreement. Check the agreement's rules of origin chapter and the importing country's requirements before use.";
+  return `${head(usmca?"USMCA / CUSMA / T-MEC":"Certification of Origin",usmca?"Certification of origin · minimum data elements, Annex 5-A":esc(f[1]),[["Reference",S.inv_no],["Date",S.cert_date],["SPI",f[2]]])}
+   <div class="boxes">
+     ${box("1. Certifier is the",S.cert_role)}
+     ${box("8. Blanket period",period)}
+     ${box("2. Certifier",cert)}
+     ${box("3. Exporter",pty(exp_))}
+     ${box("4. Producer",prod)}
+     ${box("5. Importer",pty(imp_))}
+   </div>
+   <table class="doc"><thead><tr><th class="r">#</th><th>6. Description of goods</th><th>6. HS classification (6-digit)</th><th>7. Origin ${usmca?"criterion":"rule"}</th><th>Country of origin</th></tr></thead><tbody>${lines.map((it,k)=>`<tr><td class="r">${k+1}</td><td>${esc(it.desc)}${it.part?` <span class="m">(${esc(it.part)})</span>`:""}</td><td class="m">${esc(h6(it.hts))}</td><td>${esc(it.crit)||"—"}</td><td class="m">${esc((it.coo||"").toUpperCase())}</td></tr>`).join("")}</tbody></table>
+   <div class="decl"><p style="margin:0"><b>9. Certification.</b> ${esc(statement)}</p></div>
+   ${sig(S.cert_name,S.cert_title,S.cert_date)}
+   <p class="foot">${esc(note)}</p>`;
+}
+
+function docEntry(){
+  const c=S.cur,t=totals();
+  if(S.ekind==="tib"){
+    const tb=TIB[S.tib_sub]||["",2],bond=num(S.est_duty)*tb[1];
+    const arr=S.ship_date?new Date(S.ship_date+"T12:00"):null;const by=arr?new Date(arr.getFullYear()+1,arr.getMonth(),arr.getDate()).toISOString().slice(0,10):"";
+    return `${head("TIB Entry Statement","Temporary importation under bond · 19 CFR 10.31",[["Invoice no.",S.inv_no],["Arrival",S.ship_date],["Export by",by]])}
+     <div class="boxes">${box("Importer of record",ior())}${box("Foreign shipper",shipper())}${box("HTSUS subheading",S.tib_sub+(tb[0]?" — "+tb[0]:""))}${box("Customs broker / bond",pl(S.broker,S.bond))}</div>
+     <table class="doc"><thead><tr><th class="r">#</th><th>Detailed description</th><th>Marks / part no.</th><th>HTSUS (if entered for consumption)</th><th class="r">Qty</th><th class="r">Value (${esc(c)})</th></tr></thead><tbody>${S.items.map((it,i)=>`<tr><td class="r">${i+1}</td><td>${esc(it.desc)}</td><td class="m">${esc(it.part)}</td><td class="m">${esc(it.hts)}</td><td class="r">${fmt(num(it.qty),0)} ${esc(it.uom)}</td><td class="r">${fmt(num(it.qty)*num(it.unit))}</td></tr>`).join("")}</tbody></table>
+     <div class="decl"><p><b>Statement of intended use (19 CFR 10.31(a)(3)(ii)).</b> ${esc(S.tib_use)||"________"}</p><p style="margin:0"><b>Declaration (19 CFR 10.31(a)(3)(iii)).</b> The articles will not be put to any use other than the use stated above, and will be exported within the bond period.</p></div>
+     <div class="sec">Bond worksheet</div>
+     <div class="boxes four">${box("Estimated duties and fees",money(num(S.est_duty),"USD"))}${box("Bond rate (19 CFR 10.31(f))",tb[1]===2?"Double the estimate":"110% of the estimate")}${box("Bond amount",money(bond,"USD"))}${box("Export deadline",by||"1 year after arrival")}</div>
+     <ul class="cl note"><li>Bond on CBP Form 301. Goods must be exported within 1 year of import. Extensions (CBP Form 3173) can bring the total to 3 years; apply before the bond expires.</li><li>Export under CBP supervision when required; CBP Form 3495 is used when the goods are designated for examination before export.</li><li>Goods not exported, or used for another purpose, lead to liquidated damages under the bond (19 CFR 10.39).</li></ul>
+     ${sig(S.sig_name,S.sig_title,S.req_date)}`;
+  }
+  if(S.ekind==="usret"){
+    return `${head("U.S. Goods Returned","HTSUS 9801.00.10 · declarations under 19 CFR 10.1(a)",[["Invoice no.",S.inv_no],["Exported",S.exp_date],["Export ref.",S.exp_ref]])}
+     <table class="doc"><thead><tr><th>Marks and numbers</th><th>Description</th><th class="r">Qty</th><th class="r">Value (${esc(c)})</th><th>Date exported</th></tr></thead><tbody>${S.items.map(it=>`<tr><td class="m">${esc(it.part)}</td><td>${esc(it.desc)}</td><td class="r">${fmt(num(it.qty),0)} ${esc(it.uom)}</td><td class="r">${fmt(num(it.qty)*num(it.unit))}</td><td>${esc(S.exp_date)}</td></tr>`).join("")}</tbody></table>
+     <div class="sec">Declaration of foreign shipper — 19 CFR 10.1(a)(1)</div>
+     <div class="decl"><p>I declare that, to the best of my knowledge and belief, the articles described above were exported from the United States from the port of ________ on or about ${esc(S.exp_date)||"________"}, and that they are returned without having been advanced in value or improved in condition by any process of manufacture or other means.</p></div>
+     ${sig("","",S.req_date).replace("Name and signature","Foreign shipper: name and signature")}
+     <div class="sec">Declaration of owner, importer, consignee or agent — 19 CFR 10.1(a)(2)</div>
+     <div class="decl"><p>I declare that the information in the foreign shipper's declaration above is correct to the best of my knowledge and belief, and that the articles were exported from the United States without benefit of drawback.</p></div>
+     ${sig(S.sig_name,S.sig_title,S.req_date)}
+     <p class="foot">Required for shipments over US$2,500. CBP may also ask for the U.S. export invoice, bill of lading or air waybill when the goods are not marked with the U.S. maker's name (19 CFR 10.1(b)). Shipments of US$250 or less may use CBP Form 3311 without these declarations (19 CFR 10.1(i)). Check the current text of 19 CFR 10.1 before filing; the wording above summarizes it.</p>`;
+  }
+  if(S.ekind==="forret"){
+    return `${head("Foreign Goods Returned","HTSUS 9801.00.20 · supporting statement",[["Invoice no.",S.inv_no],["Prior entry",S.prior_entry],["Exported",S.exp_date]])}
+     <div class="boxes four">${box("Prior import entry no.",S.prior_entry)}${box("Prior entry date",S.prior_date)}${box("Exported from U.S.",S.exp_date)}${box("Export reference",S.exp_ref)}</div>
+     <table class="doc"><thead><tr><th>Marks and numbers</th><th>Description</th><th class="r">Qty</th><th class="r">Value (${esc(c)})</th></tr></thead><tbody>${S.items.map(it=>`<tr><td class="m">${esc(it.part)}</td><td>${esc(it.desc)}</td><td class="r">${fmt(num(it.qty),0)} ${esc(it.uom)}</td><td class="r">${fmt(num(it.qty)*num(it.unit))}</td></tr>`).join("")}</tbody></table>
+     <div class="decl"><p>I declare that the articles described above were previously imported into the United States under the entry shown, that duty was paid on that importation, that they were exported${S.lease_ref?" under lease or similar use agreement "+esc(S.lease_ref):" under a lease or similar use agreement"} without benefit of drawback, and that they are reimported by or for the account of the person who imported them into, and exported them from, the United States, without having been advanced in value or improved in condition while abroad.</p></div>
+     ${sig(S.sig_name,S.sig_title,S.req_date)}
+     <ul class="cl note"><li>Attach: prior entry summary (CBP Form 7501) and proof of duty paid, export invoice and transport document, and the lease or use agreement.</li><li>Goods that do not meet every condition of 9801.00.20 are dutiable. Confirm with your broker.</li></ul>`;
+  }
+  if(S.ekind==="repair"){
+    const usm=["CA","MX"].includes(S.shp_country);
+    return `${head("Returned After Repair","HTSUS "+(S.warranty==="Yes"?"9802.00.40 (warranty)":"9802.00.50")+" · declarations under 19 CFR 10.8(a)",[["Invoice no.",S.inv_no],["Exported",S.exp_date],["Export ref.",S.exp_ref]])}
+     <div class="sec">Declaration of person who performed the repairs — 19 CFR 10.8(a)(1)</div>
+     <div class="decl"><p>I, ${esc(S.rep_co)||"________"}, declare that the articles described below are the articles received from ${esc(S.con_co)||"the U.S. owner or exporter"}; that they were received by me (us) only for repair or alteration; that only the repairs or alterations described below were performed by me (us); that no substitution was made for the articles received; and that the full cost (or, when no charge is made, the value) of the repairs or alterations is correctly stated below.</p></div>
+     <table class="doc"><thead><tr><th>Marks and numbers</th><th>Description of articles and of repairs or alterations</th><th class="r">Full cost or value of repairs</th><th class="r">Total value after repair</th></tr></thead><tbody>${S.items.map((it,i)=>`<tr><td class="m">${esc(it.part)}</td><td>${esc(it.desc)}${i===0&&S.rep_desc?`<br><b>Work performed:</b> ${esc(S.rep_desc)}`:""}</td><td class="r">${i===0?money(num(S.rep_cost),c):""}</td><td class="r">${i===0&&S.rep_after?money(num(S.rep_after),c):""}</td></tr>`).join("")}</tbody></table>
+     ${sig("","",S.req_date).replace("Name and signature","Repairer: name and signature")}
+     <div class="sec">Declaration of owner, importer, consignee or agent — 19 CFR 10.8(a)(2)</div>
+     <div class="decl"><p>I declare that, to the best of my knowledge and belief, the repairer's declaration above is true and correct; that the articles were exported from the United States for repairs or alterations ${S.exp_date?"on "+esc(S.exp_date)+" ":""}${S.exp_ref?"("+esc(S.exp_ref)+") ":""}without benefit of drawback; and that the articles returned are the same articles that were exported and are identified in the repairer's declaration.</p></div>
+     ${sig(S.sig_name,S.sig_title,S.req_date)}
+     <ul class="cl note"><li>Duty applies only to the cost or value of the repairs performed abroad (19 CFR 10.8(d))${S.warranty==="Yes"?"; warranty repairs are claimed under 9802.00.40":""}.</li><li>CBP may ask for proof of export, such as the export invoice or bill of lading (19 CFR 10.8(b)).</li>${usm?`<li><b>Repaired in ${esc(cname(S.shp_country))}:</b> under USMCA Article 2.6 the goods re-enter duty-free whether or not the repair was under warranty. Confirm with your broker which declarations CBP wants for USMCA repairs.</li>`:""}<li>Check the current text of 19 CFR 10.8 before filing; the wording above summarizes it.</li></ul>`;
+  }
+  return "";
+}
+
+function docPGA(){
+  const rows=[];
+  S.items.forEach((it,i)=>{const k=it.pga||pgaHint(it.hts);if(!k)return;const g=PGA[k];
+    rows.push(`<tr><td class="r">${i+1}</td><td>${esc(it.desc)}<br><span class="m">${esc(it.hts)}</span>${it.pga?"":"<br><i>Suggested from the HTS number</i>"}</td><td><b>${esc(g.a)}</b><br>${esc(g.l)}</td><td><ul class="cl">${g.d.map(d=>`<li>${esc(d)}</li>`).join("")}</ul></td><td class="m">${esc(g.c)}</td><td class="c"><span class="tick"></span></td></tr>`)});
+  return `${head("Other Agency (PGA) Checklist","Partner government agency requirements for this entry",[["Invoice no.",S.inv_no],["Port of entry",S.port],["Arrival",S.ship_date]])}
+   ${rows.length?`<table class="doc"><thead><tr><th class="r">Line</th><th>Goods</th><th>Agency</th><th>Documents and data needed</th><th>Rule</th><th class="c">On file</th></tr></thead><tbody>${rows.join("")}</tbody></table>`:`<p>No line on this request is marked as regulated by another agency, and no HTS number matched a common agency pattern. Many goods still have agency rules: confirm with your broker.</p>`}
+   <div class="decl"><p style="margin:0">Agency data is usually transmitted electronically by the broker in ACE (the PGA message set). Missing agency data can stop release. Requirements depend on the exact product, its intended use and the HTS number; this list covers common cases and is not complete.</p></div>
+   ${sig(S.sig_name,S.sig_title,S.req_date)}`;
+}
+
+/* ---------- tabs and refresh ---------- */
+let cur="form";
+function docList(){
+  const d=[["ci","Commercial invoice",docCI]];
+  if(isExp())d.push(["sli","Shipper's letter of instruction",docSLI]);
+  if(ftaOn())d.push(["fta",isExp()&&S.dest==="IL"?"Israel invoice declaration":"FTA certification",docFTA]);
+  if(!isExp()&&S.ekind!=="consumption")d.push(["entry",{tib:"TIB statement",usret:"Goods returned declarations",forret:"Foreign goods returned",repair:"Repair declarations"}[S.ekind],docEntry]);
+  if(!isExp())d.push(["pga","Other agency checklist",docPGA]);
+  return d;
+}
+function refresh(){
+  document.querySelectorAll(".mode").forEach(b=>b.setAttribute("aria-pressed",b.dataset.mode===S.mode));
+  $("example-note").hidden=!S._example;
+  const t=totals(),c=S.cur;
+  S.items.forEach((it,i)=>{const cell=document.querySelector(`[data-tot="${i}"]`);if(cell)cell.textContent=fmt(num(it.qty)*num(it.unit))});
+  const st=isExp()?eeiStatus():null;
+  $("totals").innerHTML=`<span>Goods value <b>${money(t.val,c)}</b></span><span>Invoice total <b>${money(t.inv,c)}</b></span><span>Net weight <b>${fmt(t.kg,1)} kg / ${fmt(t.kg*KG_LB,1)} lb</b></span><span>Packages <b>${t.pk}</b></span>${st?`<span>EEI <b>${st.req?"required":"not required ("+st.cite+")"}</b></span>`:""}`;
+  const iss=checks(),errs=iss.filter(x=>x[0]==="err").length,warns=iss.length-errs;
+  $("status").className="status "+(errs?"err":warns?"warn":"ok");
+  $("status").textContent=errs?`${errs} to fix`:warns?`Ready · ${warns} to review`:"Ready to ship";
+  $("issues").innerHTML=iss.map(([k,m])=>`<li class="${k}">${esc(m)}</li>`).join("")||`<li class="ok">All required fields are complete.</li>`;
+  const docs=docList();
+  if(cur!=="form"&&!docs.some(d=>d[0]===cur))cur="form";
+  $("tabs").innerHTML=`<button role="tab" data-tab="form" aria-selected="${cur==="form"}"><span class="n">1</span>Request</button>`+docs.map((d,i)=>`<button role="tab" data-tab="${d[0]}" aria-selected="${cur===d[0]}"><span class="n">${i+2}</span>${esc(d[1])}</button>`).join("");
+  $("tab-form").hidden=cur!=="form";
+  const hint=errs?`Draft: ${errs} item${errs>1?"s":""} still to fix on the request.`:"Built from the request. Changes on the request update this document.";
+  $("docs").innerHTML=docs.map(([id,l,fn])=>`<div data-doc="${id}" ${cur===id?"":"hidden"}><div class="docbar"><span class="hint">${esc(hint)}</span><span class="tools"><button type="button" class="primary" data-print>Print / Save as PDF</button> <button type="button" data-tab="form">Edit request</button></span></div><div class="paperwrap"><div class="paper">${cur===id?fn():""}</div></div></div>`).join("");
+}
+document.addEventListener("click",e=>{
+  const t=e.target.closest("[data-tab]");if(t){cur=t.dataset.tab;refresh();window.scrollTo({top:0})}
+  if(e.target.closest("[data-print]"))window.print();
+  const m=e.target.closest(".mode");if(m){S.mode=m.dataset.mode;save();renderForm();renderItems();refresh()}
+});
+const exs=$("exsel");Object.entries(EX).forEach(([k,v])=>{const o=document.createElement("option");o.value=k;o.textContent=v[0];exs.appendChild(o)});
+exs.addEventListener("change",()=>{const k=exs.value;if(!k)return;S=Object.assign(blank(),EX[k][1]());S.items=S.items.map(i=>Object.assign(blankItem(),i));S._example=true;save();cur="form";renderForm();renderItems();refresh();exs.value=""});
+let pendingNew=false;
+$("btn-new").addEventListener("click",e=>{
+  if(!pendingNew){pendingNew=true;e.target.textContent="Clear all fields?";setTimeout(()=>{pendingNew=false;e.target.textContent="New blank request"},3500);return}
+  pendingNew=false;e.target.textContent="New blank request";const m=S.mode;S=blank();S.mode=m;save();cur="form";renderForm();renderItems();refresh()});
+
+renderForm();renderItems();refresh();
+})();
+</script>
+</body>
+</html>
