@@ -478,7 +478,8 @@ function checks(){
     if(!itar&&!eccn&&usRules)W(`Line ${n}: no U.S. export classification. ${S.orig==="US"?"U.S. exports":"U.S.-origin goods"} need the ECCN, EAR99, or the USML category.`);
     if(itar){
       if(!S.us_auth.trim())E(`Line ${n}: ITAR item (USML ${itar}). Enter the DDTC licence, agreement or exemption that covers this shipment, or note why none is needed. The commercial invoice must show it (22 CFR 123.9(b)).`);
-      W(`Line ${n}: ITAR item in Canada. Confirm the Export Control List classification and that everyone handling it is registered or exempt under the Controlled Goods Program.`);
+      if(caRules)W(`Line ${n}: ITAR item exported from Canada. Confirm the Export Control List classification (often Group 2) and that everyone handling it is registered or exempt under the Controlled Goods Program.`);
+      else if(S.dest==="CA")W(`Line ${n}: ITAR item going to Canada. The Canadian consignee must be registered or exempt under the Controlled Goods Program before it receives the goods.`);
       if(!eg&&caRules)W(`Line ${n}: ECL group not entered for an ITAR item exported from Canada.`);
     }
     if(!eg&&caRules)W(`Line ${n}: no Canadian Export Control List entry. Choose a group, or NC if the item is not controlled.`);
